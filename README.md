@@ -1,5 +1,7 @@
 # 校园失物招领
 
+[GitHub 仓库](https://github.com/cht-hyp/campus-lost-and-found) · [协作说明](docs/github-collaboration.md)
+
 一个可直接用 **Chrome 打开 HTML** 的校园失物招领网页。保留原型的蓝白配色与卡片布局，支持电脑和手机宽度；无服务器、数据库、构建步骤或网络依赖。
 
 ![电脑端首页](artifacts/home-desktop.png)

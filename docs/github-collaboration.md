@@ -1,6 +1,6 @@
 # GitHub 结对协作与提交清单
 
-仓库名称按报告中的学号顺序为 `102401309-102401234`。本次登录账户为 `cht-hyp`。远程仓库创建、推送和最终下载验证结果完成后记录在执行说明中；不要把本地 commit 当成另一位成员的贡献。
+项目名称为“校园失物招领”，协作仓库为 [cht-hyp/campus-lost-and-found](https://github.com/cht-hyp/campus-lost-and-found)，主分支为 `main`。仓库地址使用英文名称，README 与仓库描述保留中文项目名。本次保存现有代码及提交历史，成员后续通过各自账号提交真实改动。
 
 ## 另一位成员的实际操作
 
@@ -13,8 +13,8 @@
 
 ```powershell
 git clone <自己fork仓库的URL>
-cd 102401309-102401234
-git remote add upstream https://github.com/cht-hyp/102401309-102401234.git
+cd campus-lost-and-found
+git remote add upstream https://github.com/cht-hyp/campus-lost-and-found.git
 git switch -c review/my-contribution
 # 实际进行修改，然后测试
 npm test
