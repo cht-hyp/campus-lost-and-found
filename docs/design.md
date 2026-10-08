@@ -30,7 +30,7 @@ Post 包含 id、type(lost/found)、title、category、location、occurredAt(本
 
 存储先成功再切换应用状态。读写失败、非法存储内容、无结果、记录不存在、未保存离开均有明确提示；损坏数据不静默覆盖。剪贴板写入成功后才提示成功，失败时展示可选中文本。用户文本按文本渲染，避免执行 HTML。
 
-file:// 下 localStorage 需在 Chrome 实测；README 说明同一浏览器配置和文件路径的边界。无图片上传、登录、服务器、聊天、地图或后台管理。
+file:// 下 localStorage 需在 Chrome 实测；README 说明同一浏览器配置和文件路径的边界。图片仅在浏览器内处理；无登录、服务器、聊天、地图或后台管理。
 
 ## 验收
 

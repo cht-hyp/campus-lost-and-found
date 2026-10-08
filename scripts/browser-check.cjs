@@ -210,6 +210,31 @@ const { pathToFileURL } = require('node:url');
       await page.getByRole('button', { name: '放弃修改', exact: true }).click();
       await page.waitForSelector('.post-card');
     });
+    await check('历史菜单跳过同路由记录后，取消后退仍恢复发布页', async () => {
+      const isolated = await browser.newContext();
+      await isolated.setOffline(true);
+      const historyPage = await isolated.newPage();
+      historyPage.setDefaultTimeout(10000);
+      await historyPage.goto(pathToFileURL(entry).href);
+      const nav = historyPage.locator('.main-nav');
+      await nav.getByRole('link', { name: '发布信息', exact: true }).click();
+      await nav.getByRole('link', { name: '首页', exact: true }).click();
+      await historyPage.evaluate(() => history.go(-2));
+      await historyPage.waitForFunction(() => history.state.campusIndex === 0);
+      await nav.getByRole('link', { name: '发布信息', exact: true }).click();
+      await historyPage.getByLabel('物品名称', { exact: false }).fill('历史跳转后未保存的物品');
+      await historyPage.goBack();
+      await historyPage.getByRole('button', { name: '继续编辑', exact: true }).click();
+      await historyPage.waitForFunction(
+        () => location.hash === '#/publish' && history.state.campusIndex === 1
+      );
+      assert.equal(
+        await historyPage.getByLabel('物品名称', { exact: false }).inputValue(),
+        '历史跳转后未保存的物品'
+      );
+      assert.equal(await historyPage.locator('#confirm-dialog').isVisible(), false);
+      await isolated.close();
+    });
     await check('关键词与类别地点组合筛选', async () => {
       await page.getByRole('searchbox', { name: '搜索物品' }).fill('验收用');
       await page.getByLabel('筛选类别', { exact: true }).selectOption('数码设备');

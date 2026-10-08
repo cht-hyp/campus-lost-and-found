@@ -193,6 +193,12 @@
     render();
   }
 
+  // 历史菜单可能跳到同一个 hash，不会触发 hashchange，仍需同步当前位置。
+  window.addEventListener('popstate', () => {
+    const index = history.state && history.state.campusIndex;
+    if ((location.hash || '#/home') === currentHash && Number.isInteger(index)) routeIndex = index;
+  });
+
   // 点击导航在改变 URL 前检查；浏览器后退则用历史索引恢复原位置，保留表单 DOM。
   window.addEventListener('hashchange', async () => {
     const target = location.hash || '#/home';
