@@ -2,22 +2,23 @@
 
 项目名称为“校园失物招领”，协作仓库为 [cht-hyp/campus-lost-and-found](https://github.com/cht-hyp/campus-lost-and-found)，主分支为 `main`。仓库地址使用英文名称，README 与仓库描述保留中文项目名。本次保存现有代码及提交历史，成员后续通过各自账号提交真实改动。
 
-当前仓库为私有仓库。仓库所有者先在 **Settings → Collaborators → Add people** 中邀请对方的 GitHub 账号，对方接受邀请后即可访问与提交代码。
+仓库公开访问。老师可直接查看代码或通过 **Code → Download ZIP** 下载；同伴可 Fork 后提交 PR，无需协作邀请。需要直接向原仓库推送时，再由仓库所有者在 **Settings → Collaborators → Add people** 中邀请对方的 GitHub 账号。
 
 ## 另一位成员的实际操作
 
-1. 使用自己的 GitHub 账号接受仓库协作邀请。
-2. Clone 项目仓库。
+1. 使用自己的 GitHub 账号打开项目仓库，点击 Fork。
+2. Clone 自己的 fork，将原项目添加为 upstream。
 3. 从最新主分支创建功能分支，实际阅读、修改或补充一个有意义的功能、测试或文档。
 4. 本地运行 `npm test`，用 Chrome 打开 `index.html` 走查。
-5. 以自己的 Git 身份提交，将功能分支 push 到项目仓库，发起合并到 `main` 的 PR。
+5. 以自己的 Git 身份提交，将功能分支 push 到自己的 fork，发起合并到原仓库 `main` 的 PR。
 6. 原仓库成员查看差异、运行测试、交流问题后再合并，并保存实际截图。
 
 ```powershell
-git clone https://github.com/cht-hyp/campus-lost-and-found.git
+git clone https://github.com/<自己的GitHub用户名>/campus-lost-and-found.git
 cd campus-lost-and-found
+git remote add upstream https://github.com/cht-hyp/campus-lost-and-found.git
 git switch main
-git pull --ff-only
+git pull --ff-only upstream main
 git switch -c codex/my-contribution
 # 实际进行修改，然后测试
 npm test
