@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2764e7" />
+    <meta name="description" content="拾光校园失物招领：发布、寻找、联系，让失物回家。" />
+    <title>拾光 · 校园失物招领</title>
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <script defer src="js/core.js"></script>
+    <script defer src="js/storage.js"></script>
+    <script defer src="js/seed.js"></script>
+    <script defer src="js/ui.js"></script>
+    <script defer src="js/views.js"></script>
+    <script defer src="js/app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到主要内容</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="#/home" aria-label="拾光，返回首页">
+          <img src="assets/logo.svg" width="42" height="42" alt="" />
+          <span class="brand-text"
+            ><strong>拾光<span class="brand-dot">.</span></strong
+            ><span>校园失物招领</span></span
+          >
+        </a>
+        <nav class="main-nav" aria-label="主要导航">
+          <a href="#/home" data-nav="home">首页</a>
+          <a href="#/search" data-nav="search">寻找物品</a>
+          <a href="#/mine" data-nav="mine">我的发布</a>
+        </nav>
+        <a class="button primary header-publish" href="#/publish"
+          ><span class="plus-sign" aria-hidden="true">＋</span>发布信息</a
+        >
+      </div>
+    </header>
+    <main id="main-content" class="page-shell" tabindex="-1">
+      <div id="app"><div class="loading">正在整理校园里的善意…</div></div>
+      <noscript><p class="error-banner">请在 Chrome 中启用 JavaScript 后使用此网页。</p></noscript>
+    </main>
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <span class="footer-motto">一份善意，让失物回家。</span
+        ><span>本机演示 · 数据保存在当前浏览器</span>
+      </div>
+    </footer>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    <dialog
+      id="confirm-dialog"
+      class="modal"
+      aria-labelledby="confirm-title"
+      aria-describedby="confirm-message"
+    >
+      <div class="modal-symbol" aria-hidden="true">?</div>
+      <h2 id="confirm-title"></h2>
+      <p id="confirm-message"></p>
+      <div class="modal-actions">
+        <button type="button" class="button secondary" id="confirm-cancel">取消</button
+        ><button type="button" class="button primary" id="confirm-ok">确认</button>
+      </div>
+    </dialog>
+    <dialog id="copy-dialog" class="modal" aria-labelledby="copy-title">
+      <div class="modal-symbol" aria-hidden="true">↗</div>
+      <h2 id="copy-title">手动复制联系方式</h2>
+      <p>浏览器未允许自动复制。请选中下方内容，使用 Ctrl+C 或长按复制。</p>
+      <label class="sr-only" for="manual-contact">手动复制文本</label
+      ><input id="manual-contact" class="manual-contact" readonly />
+      <button type="button" class="button primary full-width" id="copy-close">关闭</button>
+    </dialog>
+  </body>
+</html>

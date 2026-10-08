@@ -1,0 +1,252 @@
+// 可选开发验收工具；网页运行不依赖 Playwright。安装和运行方式见 README。
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright-core');
+const assert = require('node:assert/strict');
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const { pathToFileURL } = require('node:url');
+
+(async () => {
+  const project = path.resolve(__dirname, '..');
+  const entry = path.resolve(process.env.CAMPUS_ENTRY || path.join(project, 'index.html'));
+  const output = path.join(project, 'artifacts');
+  await fs.mkdir(output, { recursive: true });
+  const browser = await chromium.launch({
+    executablePath:
+      process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe',
+    headless: true
+  });
+  const context = await browser.newContext({
+    viewport: { width: 1440, height: 1000 },
+    locale: 'zh-CN',
+    timezoneId: 'Asia/Shanghai'
+  });
+  await context.setOffline(true);
+  const page = await context.newPage();
+  const errors = [];
+  const checks = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  page.setDefaultTimeout(10000);
+  async function check(name, action) {
+    await action();
+    checks.push(name);
+    console.log(`PASS ${name}`);
+  }
+  async function menu(name) {
+    await page.locator('.main-nav').getByRole('link', { name, exact: true }).click();
+  }
+  async function fillPost(title, type = 'lost') {
+    await page.getByLabel(type === 'found' ? '我捡到了' : '我丢东西了', { exact: false }).check();
+    await page.getByLabel('物品名称', { exact: false }).fill(title);
+    await page
+      .getByLabel('物品类别', { exact: false })
+      .selectOption(type === 'found' ? '生活用品' : '数码设备');
+    await page
+      .getByLabel(type === 'found' ? '拾取地点' : '遗失地点', { exact: false })
+      .fill(type === 'found' ? '东区食堂门口' : '图书馆二楼');
+    await page
+      .getByLabel(type === 'found' ? '拾取时间' : '遗失时间', { exact: false })
+      .fill('2024-01-01T10:00');
+    await page
+      .getByLabel('物品描述', { exact: false })
+      .fill('白色物品，蓝色贴纸。<img src=x onerror="window.injected=1">');
+    await page.locator('#post-form').getByLabel('联系方式', { exact: false }).fill('微信：qa_demo');
+  }
+
+  try {
+    await check('Chrome 直接打开 HTML，初始化 8 条示例', async () => {
+      await page.goto(pathToFileURL(entry).href);
+      await page.waitForSelector('.post-card');
+      assert.equal(await page.locator('.post-card').count(), 8);
+      assert.ok(page.url().startsWith('file:'));
+      await page.screenshot({ path: path.join(output, 'home-desktop.png'), fullPage: true });
+    });
+    await check('空表单显示字段错误', async () => {
+      await page.getByRole('link', { name: '发布信息', exact: true }).first().click();
+      await page.getByRole('button', { name: '立即发布', exact: true }).click();
+      await page.locator('[data-error-for="title"]').filter({ hasText: '请填写' }).waitFor();
+    });
+    await check('发布寻物并进入真实详情', async () => {
+      await fillPost('验收用蓝牙耳机');
+      await page.screenshot({ path: path.join(output, 'publish-desktop.png'), fullPage: true });
+      await page.getByRole('button', { name: '立即发布', exact: true }).click();
+      await page.getByRole('heading', { name: '发布成功' }).waitFor();
+      await page.getByRole('link', { name: '查看这条信息', exact: true }).click();
+      await page.getByRole('heading', { name: '验收用蓝牙耳机', exact: true }).waitFor();
+    });
+    await check('用户 HTML 仅显示为文本', async () => {
+      assert.equal(await page.evaluate(() => window.injected), undefined);
+      assert.ok((await page.locator('.item-description').innerText()).includes('<img'));
+    });
+    await check('发布者完成寻物，刷新仍为已找到', async () => {
+      await page.getByRole('button', { name: '标记为已找到', exact: true }).click();
+      await page.getByRole('button', { name: '确认完成', exact: true }).click();
+      await page.locator('.status-badge').filter({ hasText: '已找到' }).first().waitFor();
+      await page.reload();
+      await page.locator('.status-badge').filter({ hasText: '已找到' }).first().waitFor();
+    });
+    await check('编辑已完成信息不重置状态', async () => {
+      await page.getByRole('link', { name: '编辑信息', exact: true }).click();
+      await page.getByLabel('物品名称', { exact: false }).fill('验收用白色耳机');
+      await page.getByRole('button', { name: '保存修改', exact: true }).click();
+      await page.getByRole('button', { name: '确认保存', exact: true }).click();
+      await page.getByRole('heading', { name: '验收用白色耳机', exact: true }).waitFor();
+      await page.locator('.status-badge').filter({ hasText: '已找到' }).first().waitFor();
+      await page.screenshot({ path: path.join(output, 'detail-desktop.png'), fullPage: true });
+    });
+    await check('我的发布仅包含当前浏览器记录', async () => {
+      await menu('我的发布');
+      assert.equal(await page.locator('.post-card').count(), 1);
+      assert.ok((await page.locator('.post-card .status-badge').innerText()).includes('已找到'));
+      assert.ok((await page.locator('.post-card').innerText()).includes('验收用白色耳机'));
+    });
+    await check('未保存离开取消后保留表单', async () => {
+      await page.getByRole('link', { name: '编辑信息', exact: true }).click();
+      await page.getByLabel('物品名称', { exact: false }).fill('尚未保存的名称');
+      await menu('首页');
+      await page.getByRole('button', { name: '继续编辑', exact: true }).click();
+      assert.equal(
+        await page.getByLabel('物品名称', { exact: false }).inputValue(),
+        '尚未保存的名称'
+      );
+    });
+    await check('浏览器后退取消后恢复原路由和表单', async () => {
+      await page.goBack();
+      await page.getByRole('button', { name: '继续编辑', exact: true }).click();
+      await page.waitForFunction(() => location.hash.startsWith('#/edit/'));
+      assert.equal(
+        await page.getByLabel('物品名称', { exact: false }).inputValue(),
+        '尚未保存的名称'
+      );
+      await menu('首页');
+      await page.getByRole('button', { name: '放弃修改', exact: true }).click();
+      await page.waitForSelector('.post-card');
+    });
+    await check('关键词与类别地点组合筛选', async () => {
+      await page.getByRole('searchbox', { name: '搜索物品' }).fill('验收用');
+      await page.getByLabel('筛选类别', { exact: true }).selectOption('数码设备');
+      await page.getByLabel('筛选地点', { exact: true }).selectOption('图书馆');
+      await page.getByRole('button', { name: '搜索', exact: true }).click();
+      await page.waitForFunction(() => location.hash.startsWith('#/search'));
+      assert.equal(await page.locator('.post-card').count(), 1);
+    });
+    await check('无结果有提示并可清空筛选', async () => {
+      await page.getByRole('searchbox', { name: '搜索物品' }).fill('完全不存在的物品');
+      await page.getByRole('button', { name: '搜索', exact: true }).click();
+      await page.getByRole('heading', { name: '暂时没有匹配的信息' }).waitFor();
+      await page.getByRole('button', { name: '清空筛选', exact: true }).last().click();
+      assert.equal(await page.locator('.post-card').count(), 9);
+    });
+    await check('招领发布及已归还流程', async () => {
+      await page.getByRole('link', { name: '发布信息', exact: true }).first().click();
+      await fillPost('验收用保温杯', 'found');
+      await page.getByRole('button', { name: '立即发布', exact: true }).click();
+      await page.getByRole('link', { name: '查看这条信息', exact: true }).click();
+      await page.getByRole('button', { name: '标记为已归还', exact: true }).click();
+      await page.getByRole('button', { name: '确认完成', exact: true }).click();
+      await page.locator('.status-badge').filter({ hasText: '已归还' }).first().waitFor();
+    });
+    await check('剪贴板被拒绝时可人工复制', async () => {
+      await page.evaluate(() =>
+        Object.defineProperty(navigator, 'clipboard', {
+          configurable: true,
+          value: { writeText: () => Promise.reject(new Error('NotAllowedError')) }
+        })
+      );
+      await page.getByRole('button', { name: '复制联系方式', exact: true }).click();
+      await page.getByRole('heading', { name: '手动复制联系方式', exact: true }).waitFor();
+      assert.equal(await page.locator('#manual-contact').inputValue(), '微信：qa_demo');
+      await page.getByRole('button', { name: '关闭', exact: true }).click();
+    });
+    await check('390px 窄屏无横向溢出', async () => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await menu('首页');
+      assert.equal(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+        true
+      );
+      await page.screenshot({ path: path.join(output, 'home-mobile.png') });
+      await page.locator('.post-card').first().scrollIntoViewIfNeeded();
+      await page.screenshot({ path: path.join(output, 'list-mobile.png') });
+    });
+    await check('保存失败保留输入且不进入成功页', async () => {
+      await page.getByRole('link', { name: '发布信息', exact: true }).first().click();
+      await fillPost('保存失败的物品');
+      await page.evaluate(() => {
+        Storage.prototype.setItem = function () {
+          throw new Error('QuotaExceededError');
+        };
+      });
+      await page.getByRole('button', { name: '立即发布', exact: true }).click();
+      await page.locator('#form-summary').filter({ hasText: '保存失败' }).waitFor();
+      assert.equal(
+        await page.getByLabel('物品名称', { exact: false }).inputValue(),
+        '保存失败的物品'
+      );
+      assert.ok(page.url().includes('#/publish'));
+    });
+    await check('他人详情不提供管理入口，伪造编辑路径被拒绝', async () => {
+      const other = await context.newPage();
+      await other.goto(pathToFileURL(entry).href + '#/detail/demo-1');
+      await other.getByRole('heading', { name: '蓝牙耳机', exact: true }).waitFor();
+      assert.equal(await other.locator('.owner-actions').count(), 0);
+      await other.goto(pathToFileURL(entry).href + '#/edit/demo-1');
+      await other.getByRole('heading', { name: '暂时无法打开这个页面' }).waitFor();
+      assert.equal(await other.locator('#post-form').count(), 0);
+      await other.close();
+    });
+    await check('不存在的记录显示恢复入口', async () => {
+      const other = await context.newPage();
+      await other.goto(pathToFileURL(entry).href + '#/detail/does-not-exist');
+      await other.getByRole('heading', { name: '暂时无法打开这个页面' }).waitFor();
+      assert.equal(await other.getByRole('link', { name: '返回首页', exact: true }).count(), 1);
+      await other.close();
+    });
+    await check('损坏的本地数据不会被初始化覆盖', async () => {
+      const isolated = await browser.newContext();
+      await isolated.addInitScript(() => localStorage.setItem('campus-lost-found:v1', '{broken'));
+      const damaged = await isolated.newPage();
+      await damaged.goto(pathToFileURL(entry).href);
+      await damaged.getByRole('heading', { name: '暂时无法读取本地数据' }).waitFor();
+      assert.equal(
+        await damaged.evaluate(() => localStorage.getItem('campus-lost-found:v1')),
+        '{broken'
+      );
+      await isolated.close();
+    });
+    await check('浏览器禁用存储时显示明确提示', async () => {
+      const isolated = await browser.newContext();
+      await isolated.addInitScript(() =>
+        Object.defineProperty(window, 'localStorage', {
+          get() {
+            throw new DOMException('存储已禁用', 'SecurityError');
+          }
+        })
+      );
+      const blocked = await isolated.newPage();
+      await blocked.goto(pathToFileURL(entry).href);
+      await blocked.getByRole('heading', { name: '暂时无法读取本地数据' }).waitFor();
+      await isolated.close();
+    });
+    await check('浏览器没有未捕获脚本错误', async () => assert.deepEqual(errors, []));
+    const report = {
+      browser: await browser.version(),
+      entry: 'file:// index.html',
+      offline: true,
+      viewport: '1440x1000 / 390x844',
+      passed: checks.length,
+      checks,
+      errors,
+      checkedAt: new Date().toISOString()
+    };
+    await fs.writeFile(path.join(output, 'browser-results.json'), JSON.stringify(report, null, 2));
+    console.log(`Browser checks: ${checks.length} passed, ${errors.length} page errors`);
+  } catch (error) {
+    await page
+      .screenshot({ path: path.join(output, 'failure.png'), fullPage: true })
+      .catch(() => {});
+    console.error(error);
+    process.exitCode = 1;
+  } finally {
+    await browser.close();
+  }
+})();

@@ -6,21 +6,37 @@ const { createRepository, STORAGE_KEY } = require('../js/storage.js');
 function memoryStorage() {
   const values = new Map();
   return {
-    getItem(key) { return values.has(key) ? values.get(key) : null; },
-    setItem(key, value) { values.set(key, String(value)); }
+    getItem(key) {
+      return values.has(key) ? values.get(key) : null;
+    },
+    setItem(key, value) {
+      values.set(key, String(value));
+    }
   };
 }
 function record(overrides = {}) {
   return {
-    id: 'p1', ownerId: 'someone-else', type: 'lost', status: 'open',
-    title: '校园卡', category: '证件卡片', location: '图书馆',
-    occurredAt: '2024-01-01T10:00', description: '蓝色卡套', contact: 'QQ：12345678',
-    createdAt: '2024-01-01T03:00:00.000Z', updatedAt: '2024-01-01T03:00:00.000Z',
+    id: 'p1',
+    ownerId: 'someone-else',
+    type: 'lost',
+    status: 'open',
+    title: '校园卡',
+    category: '证件卡片',
+    location: '图书馆',
+    occurredAt: '2024-01-01T10:00',
+    description: '蓝色卡套',
+    contact: 'QQ：12345678',
+    createdAt: '2024-01-01T03:00:00.000Z',
+    updatedAt: '2024-01-01T03:00:00.000Z',
     ...overrides
   };
 }
 function repository(storage, options = {}) {
-  return createRepository(storage, { idFactory: () => 'local-owner', seedPosts: [record()], ...options });
+  return createRepository(storage, {
+    idFactory: () => 'local-owner',
+    seedPosts: [record()],
+    ...options
+  });
 }
 
 test('首次启动保存匿名身份及示例，示例不属于当前用户', () => {
@@ -43,7 +59,11 @@ test('发布记录在重新创建仓库后仍可读取', () => {
   const storage = memoryStorage();
   const repo = repository(storage);
   const state = repo.load();
-  const created = Core.createPost(record({ title: '新发布钥匙', category: '钥匙' }), state.ownerId, { id: 'new' });
+  const created = Core.createPost(
+    record({ title: '新发布钥匙', category: '钥匙' }),
+    state.ownerId,
+    { id: 'new' }
+  );
   repo.save({ ...state, posts: [...state.posts, created] });
   const reloaded = repository(storage).load();
   assert.equal(reloaded.posts.length, 2);
@@ -62,26 +82,51 @@ test('已完成状态和编辑内容跨仓库加载保持一致', () => {
   assert.equal(Core.statusLabel(saved), '已归还');
 });
 test('浏览器拒绝读取时返回明确错误', () => {
-  const storage = { getItem() { throw new Error('SecurityError'); } };
-  assert.throws(() => repository(storage).load(), e => e.code === 'STORAGE_READ');
+  const storage = {
+    getItem() {
+      throw new Error('SecurityError');
+    }
+  };
+  assert.throws(
+    () => repository(storage).load(),
+    (e) => e.code === 'STORAGE_READ'
+  );
 });
 test('首次初始化无法保存时不伪造成功', () => {
-  const storage = { getItem() { return null; }, setItem() { throw new Error('QuotaExceededError'); } };
-  assert.throws(() => repository(storage).load(), e => e.code === 'STORAGE_WRITE');
+  const storage = {
+    getItem() {
+      return null;
+    },
+    setItem() {
+      throw new Error('QuotaExceededError');
+    }
+  };
+  assert.throws(
+    () => repository(storage).load(),
+    (e) => e.code === 'STORAGE_WRITE'
+  );
 });
 test('保存失败不会破坏之前保存的数据', () => {
   const storage = memoryStorage();
   const repo = repository(storage);
   const state = repo.load();
   const previous = storage.getItem(STORAGE_KEY);
-  storage.setItem = () => { throw new Error('QuotaExceededError'); };
-  assert.throws(() => repo.save({ ...state, posts: [] }), e => e.code === 'STORAGE_WRITE');
+  storage.setItem = () => {
+    throw new Error('QuotaExceededError');
+  };
+  assert.throws(
+    () => repo.save({ ...state, posts: [] }),
+    (e) => e.code === 'STORAGE_WRITE'
+  );
   assert.equal(storage.getItem(STORAGE_KEY), previous);
 });
 test('损坏 JSON 不会被示例数据静默覆盖', () => {
   const storage = memoryStorage();
   storage.setItem(STORAGE_KEY, '{broken');
-  assert.throws(() => repository(storage).load(), e => e.code === 'STORAGE_CORRUPT');
+  assert.throws(
+    () => repository(storage).load(),
+    (e) => e.code === 'STORAGE_CORRUPT'
+  );
   assert.equal(storage.getItem(STORAGE_KEY), '{broken');
 });
 for (const [name, badState] of [
@@ -97,7 +142,10 @@ for (const [name, badState] of [
     const storage = memoryStorage();
     const original = JSON.stringify(badState);
     storage.setItem(STORAGE_KEY, original);
-    assert.throws(() => repository(storage).load(), e => e.code === 'STORAGE_CORRUPT');
+    assert.throws(
+      () => repository(storage).load(),
+      (e) => e.code === 'STORAGE_CORRUPT'
+    );
     assert.equal(storage.getItem(STORAGE_KEY), original);
   });
 }
