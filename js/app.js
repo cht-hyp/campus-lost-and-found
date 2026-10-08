@@ -40,12 +40,19 @@
     cancel.textContent = cancelLabel;
     dialog.returnValue = '';
     return new Promise((resolve) => {
-      ok.onclick = () => dialog.close('yes');
-      cancel.onclick = () => dialog.close('cancel');
-      dialog.onclose = () => {
+      // close 事件异步触发；立即结束当前交互，避免旧事件干扰下一次弹窗。
+      const finish = (accepted) => {
         ok.onclick = null;
         cancel.onclick = null;
-        resolve(dialog.returnValue === 'yes');
+        dialog.oncancel = null;
+        dialog.close(accepted ? 'yes' : 'cancel');
+        resolve(accepted);
+      };
+      ok.onclick = () => finish(true);
+      cancel.onclick = () => finish(false);
+      dialog.oncancel = (event) => {
+        event.preventDefault();
+        finish(false);
       };
       dialog.showModal();
     });
@@ -83,7 +90,7 @@
     if (route.name === 'home') app.innerHTML = V.home(state);
     else if (route.name === 'search')
       app.innerHTML = V.search(state, U.searchFilters(route.params));
-    else if (route.name === 'mine') app.innerHTML = V.mine(state);
+    else if (route.name === 'mine') app.innerHTML = V.mine(state, U.searchFilters(route.params));
     else if (route.name === 'publish')
       app.innerHTML = V.editor(null, route.params.get('type') === 'found' ? 'found' : 'lost');
     else if (route.name === 'detail' && post) app.innerHTML = V.detail(post, state.ownerId);
@@ -105,7 +112,10 @@
       success: '发布成功',
       detail: post ? post.title : '信息详情'
     };
-    document.title = `${labels[route.name] || '页面不存在'} · 拾光校园失物招领`;
+    document.title =
+      route.name === 'home'
+        ? '校园失物招领'
+        : `${labels[route.name] || '页面不存在'} - 校园失物招领`;
     document.querySelectorAll('[data-nav]').forEach((anchor) => {
       const active = anchor.dataset.nav === route.name;
       anchor.classList.toggle('active', active);
@@ -298,6 +308,10 @@
       const filters = filterValues();
       filters.type = button.dataset.type;
       await navigate(U.searchHash(filters));
+    } else if (action === 'mine-type') {
+      await navigate(
+        button.dataset.type === 'all' ? '#/mine' : '#/mine?type=' + button.dataset.type
+      );
     } else if (action === 'clear-filters') await navigate('#/search', true);
     else if (action === 'cancel-form') {
       const id = document.getElementById('post-form').dataset.id;

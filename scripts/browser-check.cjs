@@ -35,7 +35,7 @@ const { pathToFileURL } = require('node:url');
     await page.locator('.main-nav').getByRole('link', { name, exact: true }).click();
   }
   async function fillPost(title, type = 'lost') {
-    await page.getByLabel(type === 'found' ? '我捡到了' : '我丢东西了', { exact: false }).check();
+    await page.getByLabel(type === 'found' ? '招领' : '寻物', { exact: true }).check();
     await page.getByLabel('物品名称', { exact: false }).fill(title);
     await page
       .getByLabel('物品类别', { exact: false })
@@ -55,6 +55,7 @@ const { pathToFileURL } = require('node:url');
   try {
     await check('Chrome 直接打开 HTML，初始化 8 条示例', async () => {
       await page.goto(pathToFileURL(entry).href);
+      await page.getByRole('heading', { name: '校园失物招领', exact: true }).waitFor();
       await page.waitForSelector('.post-card');
       assert.equal(await page.locator('.post-card').count(), 8);
       assert.ok(page.url().startsWith('file:'));
@@ -64,6 +65,8 @@ const { pathToFileURL } = require('node:url');
       await page.getByRole('link', { name: '发布信息', exact: true }).first().click();
       await page.getByRole('button', { name: '立即发布', exact: true }).click();
       await page.locator('[data-error-for="title"]').filter({ hasText: '请填写' }).waitFor();
+      await page.getByRole('button', { name: '取消', exact: true }).click();
+      await menu('发布信息');
     });
     await check('发布寻物并进入真实详情', async () => {
       await fillPost('验收用蓝牙耳机');
@@ -113,6 +116,7 @@ const { pathToFileURL } = require('node:url');
       await page.goBack();
       await page.getByRole('button', { name: '继续编辑', exact: true }).click();
       await page.waitForFunction(() => location.hash.startsWith('#/edit/'));
+      await page.locator('#confirm-dialog').waitFor({ state: 'hidden' });
       assert.equal(
         await page.getByLabel('物品名称', { exact: false }).inputValue(),
         '尚未保存的名称'
@@ -157,9 +161,25 @@ const { pathToFileURL } = require('node:url');
       assert.equal(await page.locator('#manual-contact').inputValue(), '微信：qa_demo');
       await page.getByRole('button', { name: '关闭', exact: true }).click();
     });
+    await check('我的发布按寻物招领筛选，前进后退保留筛选条件', async () => {
+      await menu('我的发布');
+      assert.equal(await page.locator('.post-card').count(), 2);
+      await page.getByRole('button', { name: '寻物', exact: true }).click();
+      assert.equal(await page.locator('.post-card').count(), 1);
+      assert.ok((await page.locator('.post-card').innerText()).includes('验收用白色耳机'));
+      await page.getByRole('button', { name: '招领', exact: true }).click();
+      assert.equal(await page.locator('.post-card').count(), 1);
+      assert.ok((await page.locator('.post-card').innerText()).includes('验收用保温杯'));
+      await page.goBack();
+      await page.waitForFunction(() => location.hash === '#/mine?type=lost');
+      await page.goForward();
+      await page.waitForFunction(() => location.hash === '#/mine?type=found');
+      assert.ok((await page.locator('.post-card .status-badge').innerText()).includes('已归还'));
+    });
     await check('390px 窄屏无横向溢出', async () => {
       await page.setViewportSize({ width: 390, height: 844 });
       await menu('首页');
+      await page.locator('#toast').waitFor({ state: 'hidden' });
       assert.equal(
         await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
         true
