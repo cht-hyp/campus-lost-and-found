@@ -112,7 +112,7 @@
     生活用品: [
       '#edf7f7',
       '#d4e7e8',
-      '<rect x="60" y="28" width="43" height="20" rx="6" fill="#6d929e"/><path d="M64 34h35M64 40h35" stroke="#95b4bd" stroke-width="2"/><rect x="54" y="47" width="55" height="79" rx="14" fill="#75a9b6"/><rect x="51" y="44" width="55" height="79" rx="14" fill="#a8ccd3" stroke="#7da9b5" stroke-width="2"/><path d="M60 61v42" stroke="#dfedef" stroke-width="5"/><rect x="64" y="70" width="28" height="23" rx="5" fill="#e7f2f3"/><path d="M72 78h12M72 85h8" stroke="#9dbdc5" stroke-width="3"/><path d="M67 47h23" stroke="#d6e8ec" stroke-width="3"/>'
+      '<rect x="59" y="26" width="42" height="23" rx="6" fill="#6d929e"/><path d="M65 33h30M65 40h30" stroke="#95b4bd" stroke-width="2"/><rect x="52" y="46" width="56" height="80" rx="14" fill="#a8ccd3" stroke="#7da9b5" stroke-width="2"/><path d="M61 62v43" stroke="#dfedef" stroke-width="5"/><rect x="66" y="72" width="28" height="23" rx="5" fill="#e7f2f3"/><path d="M74 80h12M74 87h8" stroke="#9dbdc5" stroke-width="3"/><path d="M67 49h26" stroke="#d6e8ec" stroke-width="3"/>'
     ],
     书本文具: [
       '#fff3ed',

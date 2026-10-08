@@ -60,7 +60,7 @@ npm run test:coverage
 
 实际结果保存在 [browser-results.json](../artifacts/browser-results.json)。测试使用真实安装的 Google Chrome，不使用放宽本地文件访问的参数。主流程设置为离线模式，入口为 `file://.../index.html`，桌面 1440×1000，窄屏 390×844。
 
-本次运行环境：Windows、Node.js v24.19.0、Google Chrome 154.0.8037.98。新版页面的完整验收记录时间为 2026-10-08 09:58:20（北京时间），后续重新下载验证另行记录。
+本次运行环境：Windows、Node.js v24.19.0、Google Chrome 154.0.8037.98。新版页面的完整验收记录时间为 2026-10-08 17:58:20（北京时间），后续重新下载验证另行记录。
 
 **29 项检查全部通过，主流程未捕获脚本错误为 0：**
 
