@@ -1,0 +1,112 @@
+# 校园失物招领
+
+一个可直接用 **Chrome 打开 HTML** 的校园失物招领网页。保留原型的蓝白配色与卡片布局，支持电脑和手机宽度；无服务器、数据库、构建步骤或网络依赖。
+
+![电脑端首页](artifacts/home-desktop.png)
+
+## 立即运行
+
+1. 在 GitHub 选择 **Code → Download ZIP**，解压整个项目；也可以使用 Git clone。
+2. 找到解压目录中的 `index.html`，右键选择 **打开方式 → Google Chrome**。
+3. 首页会显示 8 条标注“示例”的信息。点击底部“发布信息”，选择“寻物”或“招领”即可发布。
+
+**使用网页不需要安装 Node，不需要运行 npm install，也不需要启动本地服务器。** 请保留 `css`、`js` 目录与入口的相对位置，不要只下载一个 HTML 文件。
+
+## 功能与操作
+
+| 功能 | 操作 |
+|---|---|
+| 发布寻物 / 招领 | 点击“发布信息”，填写名称、类别、地点、时间、描述及联系方式 |
+| 浏览 / 搜索 | 首页查看卡片；关键词匹配物品名称、地点和描述，不区分英文大小写 |
+| 组合筛选 | 选择寻物或招领、类别和地点，点击“搜索”；各条件取交集 |
+| 查看详情 | 点击任意信息卡片，查看完整描述及联系方式 |
+| 联系发布者 | 点击“复制联系方式”；浏览器拒绝时提供手动复制弹窗 |
+| 我的发布 | 仅展示当前浏览器发布的记录，示例记录不算自己的发布 |
+| 编辑 | 从“我的发布”或本人详情进入，确认保存；未保存离开有提醒 |
+| 更新状态 | 寻物标记“已找到”，招领标记“已归还”；更新后所有页面同步展示，刷新保留 |
+
+已完成信息继续展示，以减少重复联系。编辑资料不会重置状态；发布后不再更改寻物 / 招领类型。
+
+## 数据说明
+
+- 这是**本机演示版本**，不同浏览器、浏览器配置或设备之间不共享数据。
+- 采用浏览器 `localStorage`，存储键为 `campus-lost-found:v1`。首次使用自动生成匿名发布者标识。
+- 请继续用同一 Chrome 配置和同一文件路径管理发布。移动文件夹可能进入新的存储区域；清除浏览器数据会删除本地发布。
+- “只能管理自己的信息”用于本机流程演示，是浏览器标识判断，不是线上账号认证或真正的访问控制系统。
+- 示例信息与联系方式均为演示内容，不代表真实失物。
+- `file://` 的本地存储行为取决于浏览器，已通过真实 Chrome 直接打开文件的验收。实际测试版本与时间见 [测试报告](docs/test-report.md)。
+
+## 目录说明
+
+```text
+index.html              唯一网页入口，使用 hash 路由
+css/styles.css          页面样式、电脑 / 窄屏适配
+js/
+  core.js               表单校验、搜索、归属与状态业务逻辑
+  storage.js            数据结构检查及 localStorage 持久化
+  seed.js               8 条示例信息
+  ui.js                 文本转义、路由、复制及图标工具
+  views.js              各页面模板
+  app.js                页面导航、事件、表单及状态同步
+tests/                  Node 自动化单元测试
+scripts/browser-check.cjs  可选的真实 Chrome 验收脚本
+artifacts/              实际页面截图、测试输出及验收结果
+docs/
+  design.md             设计约定
+  psp.md                开发前预估及真实过程记录
+  test-report.md        测试教程、设计与结果
+  blog-draft.md         本次作业博客草稿
+  github-collaboration.md  两人 fork / PR 协作说明
+  superpowers/plans/    已确认方案的实现任务记录
+requirement.md          原始作业要求，保留不变
+package.json            开发测试命令，无网页运行依赖
+```
+
+## 开发测试
+
+只在运行测试时需要 Node.js 22 或更新版本；本次使用 Node 24。项目无 npm 依赖，直接运行：
+
+```powershell
+npm test
+npm run test:coverage
+```
+
+业务逻辑采用 CommonJS / 浏览器双导出，网页通过普通 `script` 加载，Node 测试直接引用同一实现。
+
+可选：复现真实 Chrome 的离线、文件直开和响应式验收。此步骤的 Playwright 仅用于开发测试：
+
+```powershell
+npm install --no-save --package-lock=false playwright-core
+$env:CHROME_PATH = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+node scripts/browser-check.cjs
+```
+
+测试创建独立的临时浏览器上下文，不访问日常 Chrome 用户数据；截图和 JSON 报告写入 `artifacts`。如 Chrome 装在其他位置，修改 `CHROME_PATH`。可通过 `CAMPUS_ENTRY` 指定另一份下载项目的 `index.html`。Linux / macOS 使用对应的环境变量设置方式和 Chrome 可执行文件路径。
+
+## 存储问题
+
+**提示无法读取或保存：** 请使用 Chrome 普通窗口，检查是否禁止网站存储、是否空间不足。解决后点击重试或刷新。保存失败会保留表单，不会显示发布成功。
+
+**提示数据格式损坏：** 网页保留原数据，不会用示例静默覆盖。先关闭其他项目标签页，在 Chrome 开发者工具的 Application → Local Storage 中找到 `campus-lost-found:v1` 并复制备份。也可在 Console 中执行以下语句，把原数据复制到剪贴板后自行保存：
+
+```javascript
+copy(localStorage.getItem('campus-lost-found:v1'))
+```
+
+只有明确希望**删除所有本地发布和匿名身份、恢复示例数据**时，才在备份后执行：
+
+```javascript
+localStorage.removeItem('campus-lost-found:v1')
+location.reload()
+```
+
+**不能自动复制联系方式：** 弹窗中选中文本后按 Ctrl+C，手机可长按复制。
+
+## 作业材料
+
+- [测试报告与简易教程](docs/test-report.md)
+- [PSP 与执行记录](docs/psp.md)
+- [博客草稿](docs/blog-draft.md)
+- [GitHub 结对协作步骤](docs/github-collaboration.md)
+
+代码和自动化记录已由工具辅助完成。两位成员的实际工时、真实协作记录、博客链接及互评需要本人补充，草稿中明确区分了这些内容。
