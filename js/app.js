@@ -15,6 +15,8 @@
   let initialForm = '';
   let busy = false;
   let toastTimer;
+  let photoSequence = 0;
+  let photoLoading = false;
   history.replaceState({ campusIndex: routeIndex }, '', currentHash);
 
   function findPost(id) {
@@ -72,18 +74,68 @@
     const data = new FormData(form);
     const type = form.querySelector('[name="type"]:checked');
     const input = { type: type ? type.value : 'lost' };
-    ['title', 'category', 'location', 'occurredAt', 'description', 'contact'].forEach((name) => {
-      input[name] = data.get(name) || '';
-    });
+    ['title', 'category', 'location', 'occurredAt', 'description', 'contact', 'image'].forEach(
+      (name) => {
+        input[name] = data.get(name) || '';
+      }
+    );
     return input;
   }
   function updateDirty() {
     const form = document.getElementById('post-form');
-    dirty = Boolean(form && JSON.stringify(readPostForm(form)) !== initialForm);
+    dirty = Boolean(form && (photoLoading || JSON.stringify(readPostForm(form)) !== initialForm));
+  }
+
+  function refreshPhotoPreview(name = '') {
+    const form = document.getElementById('post-form');
+    if (!form) return;
+    const image = form.elements.image.value;
+    document.getElementById('photo-preview').innerHTML = U.itemVisual(
+      form.elements.category.value,
+      image
+    );
+    document.getElementById('photo-status').textContent = photoLoading
+      ? '正在处理图片…'
+      : image
+        ? name || '已添加图片'
+        : '默认类别图片';
+    form.querySelector('[data-action="remove-photo"]').hidden = !image;
+    form.querySelector('[data-action="choose-photo"]').disabled = photoLoading;
+    form.querySelector('button[type="submit"]').disabled = busy || photoLoading;
+  }
+
+  async function selectPhoto(file) {
+    if (!file) return;
+    const form = document.getElementById('post-form');
+    const sequence = ++photoSequence;
+    const active = () =>
+      sequence === photoSequence && document.getElementById('post-form') === form;
+    let name = '';
+    photoLoading = true;
+    document.getElementById('error-image').textContent = '';
+    refreshPhotoPreview();
+    updateDirty();
+    try {
+      const image = await CampusImages.preparePhoto(file);
+      if (!active()) return;
+      form.elements.image.value = image;
+      name = file.name;
+    } catch (error) {
+      if (active()) document.getElementById('error-image').textContent = error.message;
+    } finally {
+      if (active()) {
+        photoLoading = false;
+        document.getElementById('post-photo').value = '';
+        refreshPhotoPreview(name);
+        updateDirty();
+      }
+    }
   }
 
   function render() {
     if (!state) return;
+    photoSequence += 1;
+    photoLoading = false;
     const route = U.parseRoute(currentHash);
     const post = findPost(route.id);
     if (['home', 'search', 'mine'].includes(route.name)) lastListHash = currentHash;
@@ -193,7 +245,7 @@
     else if (message) summary.focus();
   }
   async function submitPost(form) {
-    if (busy) return;
+    if (busy || photoLoading) return;
     const input = readPostForm(form);
     const errors = C.validatePost(input);
     showFormErrors(errors);
@@ -312,6 +364,15 @@
       await navigate(
         button.dataset.type === 'all' ? '#/mine' : '#/mine?type=' + button.dataset.type
       );
+    } else if (action === 'choose-photo') document.getElementById('post-photo').click();
+    else if (action === 'remove-photo') {
+      photoSequence += 1;
+      photoLoading = false;
+      document.getElementById('post-image').value = '';
+      document.getElementById('post-photo').value = '';
+      document.getElementById('error-image').textContent = '';
+      refreshPhotoPreview();
+      updateDirty();
     } else if (action === 'clear-filters') await navigate('#/search', true);
     else if (action === 'cancel-form') {
       const id = document.getElementById('post-form').dataset.id;
@@ -341,6 +402,11 @@
   });
   document.addEventListener('change', (event) => {
     if (!event.target.closest('#post-form')) return;
+    if (event.target.id === 'post-photo') {
+      selectPhoto(event.target.files[0]);
+      return;
+    }
+    if (event.target.name === 'category') refreshPhotoPreview();
     if (event.target.name === 'type') {
       const scene = event.target.value === 'found' ? '拾取' : '遗失';
       document.querySelector('[data-scene-label="location"]').textContent = scene + '地点';

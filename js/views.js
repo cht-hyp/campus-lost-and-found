@@ -21,7 +21,7 @@
   function card(post, mine = false) {
     return `<article class="post-card">
       <a class="card-link" href="${link('detail', post.id)}" aria-label="查看${e(post.title)}详情">
-        <div class="card-art">${U.itemArt(post.category)}</div>
+        <div class="card-art">${U.itemVisual(post.category, post.image, post.title + '照片')}</div>
         <div class="card-body"><div class="card-title-row"><h3>${e(post.title)}</h3>${badge(post)}</div>
           <div class="card-meta">${icon('pin')}<span>${e(post.location)}</span></div>
           <div class="card-meta">${icon('clock')}<span>${U.formatDate(post.occurredAt)}</span></div>
@@ -80,7 +80,7 @@
     const own = post.ownerId === ownerId;
     const scene = post.type === 'lost' ? '遗失' : '拾取';
     return `${pageHeader(own ? '我的发布详情' : '信息详情', backButton())}<div class="detail-layout">
-      <article class="surface detail-card"><div class="detail-art">${U.itemArt(post.category)}</div><div class="detail-body">
+      <article class="surface detail-card"><div class="detail-art">${U.itemVisual(post.category, post.image, post.title + '照片')}</div><div class="detail-body">
         <div class="detail-title-row"><h2>${e(post.title)}</h2>${badge(post)}</div>
         <div class="detail-badges">${typeBadge(post)}<span>${e(post.category)}</span>${post.ownerId === 'demo' ? '<span class="demo-badge">示例</span>' : ''}</div>
         <dl class="detail-data"><div><dt>${scene}地点</dt><dd>${e(post.location)}</dd></div><div><dt>${scene}时间</dt><dd>${U.formatDate(post.occurredAt, true)}</dd></div><div><dt>发布时间</dt><dd>${U.formatDate(post.createdAt, true)}</dd></div></dl>
@@ -115,6 +115,14 @@
         ${field('category', '物品类别', `<select id="post-category" name="category" required aria-describedby="error-category">${options(C.CATEGORIES, value.category, '请选择物品类别')}</select>`)}
         ${field('location', scene + '地点', input('location', '请输入具体地点', 'maxlength="80" autocomplete="off" list="campus-locations"') + `<datalist id="campus-locations">${C.LOCATIONS.map((x) => `<option value="${x}">`).join('')}</datalist>`)}
         ${field('occurredAt', scene + '时间', input('occurredAt', '', `type="datetime-local" min="2000-01-01T00:00" max="${U.localNow()}"`))}
+        <div class="field wide photo-field"><label for="post-photo">物品图片<span class="optional-label">（可选）</span></label>
+          <div class="photo-control"><div id="photo-preview" class="photo-preview">${U.itemVisual(value.category, value.image)}</div><div class="photo-actions">
+            <div class="photo-buttons"><button type="button" class="button secondary" data-action="choose-photo">${icon('image')}选择图片</button><button type="button" class="text-button" data-action="remove-photo" ${value.image ? '' : 'hidden'}>移除图片</button></div>
+            <p id="photo-hint" class="photo-hint">JPG、PNG、WebP，最大 10 MB</p><span id="photo-status" class="photo-status" role="status">${value.image ? '已添加图片' : '默认类别图片'}</span>
+          </div></div>
+          <input id="post-photo" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="photo-hint error-image" hidden>
+          <input id="post-image" name="image" type="hidden" value="${e(value.image || '')}"><span id="error-image" class="field-error" data-error-for="image" role="alert"></span>
+        </div>
         ${field('description', '物品描述', `<textarea id="post-description" name="description" rows="4" maxlength="1000" placeholder="请输入颜色、外观等物品特征" required aria-describedby="error-description">${e(value.description || '')}</textarea>`, true)}
         ${field('contact', '联系方式', input('contact', '手机号、微信号或 QQ 号', 'maxlength="100" autocomplete="off"'), true)}
       </div><div class="form-actions"><button type="button" class="button secondary" data-action="cancel-form">取消</button><button type="submit" class="button primary">${editing ? '保存修改' : '立即发布'}</button></div>

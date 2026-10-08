@@ -18,6 +18,7 @@
   ]);
   const LOCATIONS = Object.freeze(['图书馆', '教学楼', '食堂', '宿舍', '操场', '校门']);
   const LIMITS = Object.freeze({ title: 60, location: 80, description: 1000, contact: 100 });
+  const MAX_IMAGE_LENGTH = 360000;
   const LABELS = {
     title: '物品名称',
     category: '物品类别',
@@ -71,13 +72,24 @@
       if (!date) errors.occurredAt = '请填写有效的日期和时间';
       else if (date > now) errors.occurredAt = '时间不能晚于现在';
     }
+    if (input.image !== undefined && input.image !== '') {
+      if (
+        typeof input.image !== 'string' ||
+        input.image.length > MAX_IMAGE_LENGTH ||
+        !/^data:image\/(?:jpeg|png|webp);base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(
+          input.image
+        ) ||
+        input.image.endsWith(',')
+      )
+        errors.image = '图片格式不正确或过大，请重新选择图片';
+    }
     return errors;
   }
 
   function validatedFields(input, now) {
     const errors = validatePost(input, now);
     if (Object.keys(errors).length) throw new DomainError('VALIDATION', '请检查填写的信息', errors);
-    const result = { type: input.type };
+    const result = { type: input.type, image: input.image || '' };
     Object.keys(LABELS).forEach((field) => {
       result[field] = text(input[field]);
     });
@@ -112,7 +124,14 @@
 
   function editPost(post, input, ownerId, now = new Date()) {
     assertOwner(post, ownerId);
-    const fields = validatedFields({ ...input, type: post.type }, now);
+    const fields = validatedFields(
+      {
+        ...input,
+        type: post.type,
+        image: input.image === undefined ? post.image || '' : input.image
+      },
+      now
+    );
     return { ...post, ...fields, updatedAt: now.toISOString() };
   }
 
@@ -149,6 +168,7 @@
     CATEGORIES,
     LOCATIONS,
     LIMITS,
+    MAX_IMAGE_LENGTH,
     DomainError,
     validatePost,
     createPost,

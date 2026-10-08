@@ -156,3 +156,26 @@ test('HTML 字样作为普通文本原样保存，不篡改用户内容', () => 
   repo.save({ ...state, posts: [record({ title: '<img src=x onerror=alert(1)>' })] });
   assert.equal(repo.load().posts[0].title, '<img src=x onerror=alert(1)>');
 });
+
+test('照片和完成状态持久化，旧的无图片记录仍可读取', () => {
+  const storage = memoryStorage();
+  const repo = repository(storage);
+  const state = repo.load();
+  assert.equal(state.posts[0].image, undefined);
+  const image = 'data:image/jpeg;base64,/9j/2Q==';
+  repo.save({ ...state, posts: [record({ image, status: 'resolved' })] });
+  const saved = repository(storage).load().posts[0];
+  assert.equal(saved.image, image);
+  assert.equal(saved.status, 'resolved');
+});
+test('非法图片数据不会覆盖已经保存的记录', () => {
+  const storage = memoryStorage();
+  const repo = repository(storage);
+  const state = repo.load();
+  const original = storage.getItem(STORAGE_KEY);
+  assert.throws(
+    () => repo.save({ ...state, posts: [record({ image: 'https://example.com/x' })] }),
+    (error) => error.code === 'STORAGE_CORRUPT'
+  );
+  assert.equal(storage.getItem(STORAGE_KEY), original);
+});

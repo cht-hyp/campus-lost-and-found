@@ -26,6 +26,9 @@ const { pathToFileURL } = require('node:url');
   const checks = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.setDefaultTimeout(10000);
+  let photoFile;
+  let savedPhoto;
+  let foundPhoto;
   async function check(name, action) {
     await action();
     checks.push(name);
@@ -60,6 +63,27 @@ const { pathToFileURL } = require('node:url');
       assert.equal(await page.locator('.post-card').count(), 8);
       assert.ok(page.url().startsWith('file:'));
       await page.screenshot({ path: path.join(output, 'home-desktop.png'), fullPage: true });
+      // 由浏览器绘制固定测试样本，确保真实走解码、压缩与存储流程。
+      const png = await page.evaluate(() => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 2400;
+        canvas.height = 1600;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#e6eef5';
+        ctx.fillRect(0, 0, 2400, 1600);
+        ctx.fillStyle = '#6c94b9';
+        ctx.fillRect(850, 400, 700, 850);
+        ctx.fillStyle = '#d2e0ed';
+        ctx.fillRect(950, 500, 140, 650);
+        ctx.fillStyle = '#456b8e';
+        ctx.fillRect(850, 300, 700, 150);
+        return canvas.toDataURL('image/png').split(',')[1];
+      });
+      photoFile = {
+        name: '验收物品.png',
+        mimeType: 'image/png',
+        buffer: Buffer.from(png, 'base64')
+      };
     });
     await check('空表单显示字段错误', async () => {
       await page.getByRole('link', { name: '发布信息', exact: true }).first().click();
@@ -68,6 +92,26 @@ const { pathToFileURL } = require('node:url');
       await page.getByRole('button', { name: '取消', exact: true }).click();
       await menu('发布信息');
     });
+    await check('未上传照片时默认图片随类别切换', async () => {
+      assert.equal(await page.locator('[data-action="remove-photo"]').isVisible(), false);
+      await page.getByLabel('物品类别', { exact: false }).selectOption('钥匙');
+      await page.locator('#photo-preview svg[data-category="钥匙"]').waitFor();
+      await page.getByLabel('物品类别', { exact: false }).selectOption('书本文具');
+      await page.locator('#photo-preview svg[data-category="书本文具"]').waitFor();
+    });
+    await check('选择照片生成预览并按比例压缩', async () => {
+      await page.locator('#post-photo').setInputFiles(photoFile);
+      await page.locator('#photo-preview .item-photo').waitFor();
+      savedPhoto = await page.locator('#post-image').inputValue();
+      assert.ok(savedPhoto.startsWith('data:image/jpeg;base64,'));
+      assert.ok(savedPhoto.length <= 360000);
+      assert.deepEqual(
+        await page
+          .locator('#photo-preview .item-photo')
+          .evaluate((img) => ({ width: img.naturalWidth, height: img.naturalHeight })),
+        { width: 1200, height: 800 }
+      );
+    });
     await check('发布寻物并进入真实详情', async () => {
       await fillPost('验收用蓝牙耳机');
       await page.screenshot({ path: path.join(output, 'publish-desktop.png'), fullPage: true });
@@ -75,6 +119,7 @@ const { pathToFileURL } = require('node:url');
       await page.getByRole('heading', { name: '发布成功' }).waitFor();
       await page.getByRole('link', { name: '查看这条信息', exact: true }).click();
       await page.getByRole('heading', { name: '验收用蓝牙耳机', exact: true }).waitFor();
+      assert.equal(await page.locator('.detail-art .item-photo').getAttribute('src'), savedPhoto);
     });
     await check('用户 HTML 仅显示为文本', async () => {
       assert.equal(await page.evaluate(() => window.injected), undefined);
@@ -84,11 +129,13 @@ const { pathToFileURL } = require('node:url');
       await page.getByRole('button', { name: '标记为已找到', exact: true }).click();
       await page.getByRole('button', { name: '确认完成', exact: true }).click();
       await page.locator('.status-badge').filter({ hasText: '已找到' }).first().waitFor();
+      assert.equal(await page.locator('.detail-art .item-photo').getAttribute('src'), savedPhoto);
       await page.reload();
       await page.locator('.status-badge').filter({ hasText: '已找到' }).first().waitFor();
     });
     await check('编辑已完成信息不重置状态', async () => {
       await page.getByRole('link', { name: '编辑信息', exact: true }).click();
+      assert.equal(await page.locator('#post-image').inputValue(), savedPhoto);
       await page.getByLabel('物品名称', { exact: false }).fill('验收用白色耳机');
       await page.getByRole('button', { name: '保存修改', exact: true }).click();
       await page.getByRole('button', { name: '确认保存', exact: true }).click();
@@ -96,11 +143,49 @@ const { pathToFileURL } = require('node:url');
       await page.locator('.status-badge').filter({ hasText: '已找到' }).first().waitFor();
       await page.screenshot({ path: path.join(output, 'detail-desktop.png'), fullPage: true });
     });
+    await check('非法类型、损坏图片和超大文件不会替换已有照片', async () => {
+      await page.getByRole('link', { name: '编辑信息', exact: true }).click();
+      for (const [file, message] of [
+        [
+          {
+            name: 'unsafe.svg',
+            mimeType: 'image/svg+xml',
+            buffer: Buffer.from('<svg onload="alert(1)"/>')
+          },
+          '请选择 JPG'
+        ],
+        [
+          { name: 'broken.png', mimeType: 'image/png', buffer: Buffer.from('not an image') },
+          '无法读取'
+        ],
+        [
+          { name: 'large.png', mimeType: 'image/png', buffer: Buffer.alloc(10485761) },
+          '不能超过 10 MB'
+        ]
+      ]) {
+        await page.locator('#post-photo').setInputFiles(file);
+        await page.locator('#error-image').filter({ hasText: message }).waitFor();
+        assert.equal(await page.locator('#post-image').inputValue(), savedPhoto);
+      }
+      await page.getByRole('button', { name: '取消', exact: true }).click();
+    });
+    await check('只修改照片也会提醒未保存，放弃后原照片保留', async () => {
+      await page.getByRole('link', { name: '编辑信息', exact: true }).click();
+      await page.getByRole('button', { name: '移除图片', exact: true }).click();
+      await menu('首页');
+      await page.getByRole('button', { name: '继续编辑', exact: true }).click();
+      assert.equal(await page.locator('#post-image').inputValue(), '');
+      await page.locator('#photo-preview svg[data-category="数码设备"]').waitFor();
+      await page.getByRole('button', { name: '取消', exact: true }).click();
+      await page.getByRole('button', { name: '放弃修改', exact: true }).click();
+      assert.equal(await page.locator('.detail-art .item-photo').getAttribute('src'), savedPhoto);
+    });
     await check('我的发布仅包含当前浏览器记录', async () => {
       await menu('我的发布');
       assert.equal(await page.locator('.post-card').count(), 1);
       assert.ok((await page.locator('.post-card .status-badge').innerText()).includes('已找到'));
       assert.ok((await page.locator('.post-card').innerText()).includes('验收用白色耳机'));
+      assert.equal(await page.locator('.post-card .item-photo').getAttribute('src'), savedPhoto);
     });
     await check('未保存离开取消后保留表单', async () => {
       await page.getByRole('link', { name: '编辑信息', exact: true }).click();
@@ -143,11 +228,15 @@ const { pathToFileURL } = require('node:url');
     await check('招领发布及已归还流程', async () => {
       await page.getByRole('link', { name: '发布信息', exact: true }).first().click();
       await fillPost('验收用保温杯', 'found');
+      await page.locator('#post-photo').setInputFiles(photoFile);
+      await page.locator('#photo-preview .item-photo').waitFor();
+      foundPhoto = await page.locator('#post-image').inputValue();
       await page.getByRole('button', { name: '立即发布', exact: true }).click();
       await page.getByRole('link', { name: '查看这条信息', exact: true }).click();
       await page.getByRole('button', { name: '标记为已归还', exact: true }).click();
       await page.getByRole('button', { name: '确认完成', exact: true }).click();
       await page.locator('.status-badge').filter({ hasText: '已归还' }).first().waitFor();
+      assert.equal(await page.locator('.detail-art .item-photo').getAttribute('src'), foundPhoto);
     });
     await check('剪贴板被拒绝时可人工复制', async () => {
       await page.evaluate(() =>
@@ -176,6 +265,40 @@ const { pathToFileURL } = require('node:url');
       await page.waitForFunction(() => location.hash === '#/mine?type=found');
       assert.ok((await page.locator('.post-card .status-badge').innerText()).includes('已归还'));
     });
+    await check('编辑可更换照片，完成状态保持', async () => {
+      await page.getByRole('link', { name: '编辑信息', exact: true }).click();
+      const replacement = await page.evaluate(() => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 300;
+        canvas.height = 200;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#99bbcc';
+        ctx.fillRect(0, 0, 300, 200);
+        return canvas.toDataURL('image/jpeg').split(',')[1];
+      });
+      await page.locator('#post-photo').setInputFiles({
+        name: '新照片.jpg',
+        mimeType: 'image/jpeg',
+        buffer: Buffer.from(replacement, 'base64')
+      });
+      await page.locator('#photo-status').filter({ hasText: '新照片.jpg' }).waitFor();
+      const changed = await page.locator('#post-image').inputValue();
+      assert.notEqual(changed, foundPhoto);
+      await page.getByRole('button', { name: '保存修改', exact: true }).click();
+      await page.getByRole('button', { name: '确认保存', exact: true }).click();
+      assert.equal(await page.locator('.detail-art .item-photo').getAttribute('src'), changed);
+      await page.locator('.status-badge').filter({ hasText: '已归还' }).waitFor();
+    });
+    await check('移除照片后恢复类别插画，刷新仍保持', async () => {
+      await page.getByRole('link', { name: '编辑信息', exact: true }).click();
+      await page.getByRole('button', { name: '移除图片', exact: true }).click();
+      await page.getByRole('button', { name: '保存修改', exact: true }).click();
+      await page.getByRole('button', { name: '确认保存', exact: true }).click();
+      await page.locator('.detail-art svg[data-category="生活用品"]').waitFor();
+      await page.reload();
+      await page.locator('.detail-art svg[data-category="生活用品"]').waitFor();
+      await page.locator('.status-badge').filter({ hasText: '已归还' }).waitFor();
+    });
     await check('390px 窄屏无横向溢出', async () => {
       await page.setViewportSize({ width: 390, height: 844 });
       await menu('首页');
@@ -188,9 +311,67 @@ const { pathToFileURL } = require('node:url');
       await page.locator('.post-card').first().scrollIntoViewIfNeeded();
       await page.screenshot({ path: path.join(output, 'list-mobile.png') });
     });
+    await check('图片处理期间取消离开保留表单与待处理图片', async () => {
+      await menu('发布信息');
+      await page.evaluate(() => {
+        window.originalPreparePhoto = CampusImages.preparePhoto;
+        CampusImages.preparePhoto = (file) =>
+          new Promise((resolve, reject) => {
+            window.releasePhoto = () => window.originalPreparePhoto(file).then(resolve, reject);
+          });
+      });
+      await page.locator('#post-photo').setInputFiles(photoFile);
+      await page.locator('#photo-status').filter({ hasText: '正在处理图片' }).waitFor();
+      assert.equal(
+        await page.getByRole('button', { name: '立即发布', exact: true }).isDisabled(),
+        true
+      );
+      await menu('首页');
+      await page.getByRole('button', { name: '继续编辑', exact: true }).click();
+      await page.evaluate(() => window.releasePhoto());
+      await page.locator('#photo-preview .item-photo').waitFor();
+      await page.evaluate(() => {
+        CampusImages.preparePhoto = window.originalPreparePhoto;
+      });
+      await page.getByRole('button', { name: '取消', exact: true }).click();
+      await page.getByRole('button', { name: '放弃修改', exact: true }).click();
+    });
+    await check('放弃正在处理的图片不会写入下一张新表单', async () => {
+      await menu('发布信息');
+      await page.evaluate(() => {
+        CampusImages.preparePhoto = (file) =>
+          new Promise((resolve, reject) => {
+            window.releasePhoto = () => window.originalPreparePhoto(file).then(resolve, reject);
+          });
+      });
+      await page.locator('#post-photo').setInputFiles(photoFile);
+      await page.locator('#photo-status').filter({ hasText: '正在处理图片' }).waitFor();
+      await menu('首页');
+      await page.getByRole('button', { name: '放弃修改', exact: true }).click();
+      await menu('发布信息');
+      await page.evaluate(() => window.releasePhoto());
+      await page.evaluate(() => {
+        CampusImages.preparePhoto = window.originalPreparePhoto;
+      });
+      assert.equal(await page.locator('#post-image').inputValue(), '');
+      assert.equal(await page.locator('#photo-preview .item-photo').count(), 0);
+      assert.equal(
+        await page.getByRole('button', { name: '立即发布', exact: true }).isDisabled(),
+        false
+      );
+    });
     await check('保存失败保留输入且不进入成功页', async () => {
       await page.getByRole('link', { name: '发布信息', exact: true }).first().click();
       await fillPost('保存失败的物品');
+      await page.locator('#post-photo').setInputFiles(photoFile);
+      await page.locator('#photo-preview .item-photo').waitFor();
+      await page.setViewportSize({ width: 320, height: 844 });
+      assert.equal(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+        true
+      );
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.screenshot({ path: path.join(output, 'publish-mobile.png'), fullPage: true });
       await page.evaluate(() => {
         Storage.prototype.setItem = function () {
           throw new Error('QuotaExceededError');
@@ -203,6 +384,7 @@ const { pathToFileURL } = require('node:url');
         '保存失败的物品'
       );
       assert.ok(page.url().includes('#/publish'));
+      assert.ok((await page.locator('#post-image').inputValue()).startsWith('data:image/jpeg;'));
     });
     await check('他人详情不提供管理入口，伪造编辑路径被拒绝', async () => {
       const other = await context.newPage();

@@ -14,7 +14,11 @@
 
 ## 数据与行为
 
-Post 包含 id、type(lost/found)、title、category、location、occurredAt(本地日期时间)、description、contact、ownerId、status(open/resolved)、createdAt、updatedAt。
+Post 包含 id、type(lost/found)、title、category、location、occurredAt(本地日期时间)、description、contact、ownerId、status(open/resolved)、createdAt、updatedAt，以及可选 image。
+
+可选图片支持 JPG、PNG、WebP，原文件不超过 10 MB、2400 万像素；images.js 在浏览器内等比缩小（最长边不超过 1200px）并压缩为 JPEG，序列化内容最多 360000 字符。类别决定默认 SVG 插画，照片优先用于卡片与详情。编辑可以保留、更换或移除照片，单独修改照片也触发未保存提醒。处理中的旧任务不能写入新页面。存储结构仍为 v1，兼容原有不含 image 的记录。
+
+用户允许为了简洁暂不添加真实登录、共享数据库及认领申请；当前继续采用已确定的本机方案，不创建后端或虚构账号登录。
 
 名称、类别、地点、时间、描述、联系方式必填；文本去除首尾空格并限制合理长度；允许电话、QQ、微信等文字联系方式；禁止非法或未来时间。
 

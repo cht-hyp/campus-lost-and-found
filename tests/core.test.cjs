@@ -201,3 +201,34 @@ test('对不存在记录的操作具有明确错误', () => {
     (e) => e.code === 'NOT_FOUND'
   );
 });
+
+const photo =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLbtAAAAABJRU5ErkJggg==';
+test('发布可携带照片，未选择照片时仍可发布', () => {
+  assert.equal(Core.createPost({ ...valid, image: photo }, 'me', { now }).image, photo);
+  assert.equal(Core.createPost(valid, 'me', { now }).image, '');
+});
+test('编辑文字默认保留照片，显式清空可恢复类别图', () => {
+  const original = post({ image: photo, status: 'resolved' });
+  assert.equal(Core.editPost(original, valid, 'me', now).image, photo);
+  const removed = Core.editPost(original, { ...valid, image: '' }, 'me', now);
+  assert.equal(removed.image, '');
+  assert.equal(removed.status, 'resolved');
+  assert.equal(original.image, photo);
+});
+for (const [name, image] of [
+  ['远程图片地址', 'https://example.com/photo.jpg'],
+  ['SVG 图片', 'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4='],
+  ['脚本地址', 'javascript:alert(1)'],
+  ['损坏的 Base64', 'data:image/jpeg;base64,\" onerror=alert(1)'],
+  ['非字符串', {}],
+  ['超过存储上限', 'data:image/jpeg;base64,' + 'A'.repeat(360001)]
+]) {
+  test(`照片拒绝${name}`, () => {
+    assert.ok(Core.validatePost({ ...valid, image }, now).image);
+    assert.throws(
+      () => Core.createPost({ ...valid, image }, 'me', { now }),
+      (error) => error.code === 'VALIDATION'
+    );
+  });
+}

@@ -10,6 +10,9 @@
 * {
   box-sizing: border-box;
 }
+[hidden] {
+  display: none !important;
+}
 body {
   margin: 0;
   font-size: 15px;
@@ -273,18 +276,22 @@ select {
   height: 100%;
 }
 .card-art {
-  flex: 0 0 84px;
-  width: 84px;
-  height: 84px;
-  padding: 10px;
-  background: #edf4ff;
-  color: #5d95e3;
-  border-radius: 8px;
+  flex: 0 0 104px;
+  width: 104px;
+  height: 104px;
+  border-radius: 12px;
+  overflow: hidden;
 }
 .item-art {
   display: block;
   width: 100%;
   height: 100%;
+}
+.item-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .card-body {
   flex: 1;
@@ -391,13 +398,20 @@ select {
 .detail-art {
   display: grid;
   place-items: center;
-  height: 220px;
-  background: #eaf3ff;
-  color: #6599df;
+  height: 260px;
+  background: #f1f5fa;
 }
 .detail-art .item-art {
-  width: 124px;
-  height: 124px;
+  width: 175px;
+  height: 175px;
+}
+.detail-art:has(.item-photo) {
+  height: 320px;
+  padding: 15px;
+}
+.detail-art .item-photo {
+  object-fit: contain;
+  border-radius: 7px;
 }
 .detail-body {
   padding: 25px 28px 28px;
@@ -542,6 +556,50 @@ select {
   margin-left: 4px;
   color: #d46363;
   font-size: 13px;
+}
+.optional-label {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+.photo-control {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.photo-preview {
+  flex: 0 0 112px;
+  width: 112px;
+  height: 112px;
+  overflow: hidden;
+  border-radius: 11px;
+  background: #f0f4fa;
+}
+.photo-actions {
+  flex: 1;
+  min-width: 0;
+}
+.photo-buttons {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px 16px;
+}
+.photo-buttons .button {
+  padding: 8px 17px;
+}
+.photo-hint {
+  margin: 10px 0 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.photo-status {
+  display: block;
+  color: #8b96a5;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .field input,
 .field select,
@@ -763,10 +821,9 @@ select {
     padding: 17px;
   }
   .card-art {
-    flex-basis: 66px;
-    width: 66px;
-    height: 66px;
-    padding: 8px;
+    flex-basis: 84px;
+    width: 84px;
+    height: 84px;
   }
   .card-title-row {
     align-items: flex-start;
@@ -851,9 +908,9 @@ select {
     gap: 14px;
   }
   .card-art {
-    flex-basis: 68px;
-    width: 68px;
-    height: 68px;
+    flex-basis: 82px;
+    width: 82px;
+    height: 82px;
   }
   .card-title-row {
     align-items: center;
@@ -890,11 +947,31 @@ select {
     gap: 16px;
   }
   .detail-art {
-    height: 185px;
+    height: 205px;
   }
   .detail-art .item-art {
-    width: 105px;
-    height: 105px;
+    width: 140px;
+    height: 140px;
+  }
+  .detail-art:has(.item-photo) {
+    height: 250px;
+    padding: 12px;
+  }
+  .photo-control {
+    gap: 14px;
+  }
+  .photo-preview {
+    flex-basis: 88px;
+    width: 88px;
+    height: 88px;
+  }
+  .photo-buttons {
+    gap: 8px 12px;
+  }
+  .photo-buttons .button {
+    min-height: 36px;
+    padding: 7px 12px;
+    font-size: 13px;
   }
   .detail-body {
     padding: 20px;
