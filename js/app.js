@@ -188,8 +188,18 @@
       route.name === 'home'
         ? '校园失物招领'
         : `${labels[route.name] || '页面不存在'} - 校园失物招领`;
+    const navigationRoute =
+      route.name === 'search'
+        ? 'home'
+        : route.name === 'detail'
+          ? post && post.ownerId === state.ownerId
+            ? 'mine'
+            : 'home'
+          : ['edit', 'success'].includes(route.name)
+            ? 'mine'
+            : route.name;
     document.querySelectorAll('[data-nav]').forEach((anchor) => {
-      const active = anchor.dataset.nav === route.name;
+      const active = anchor.dataset.nav === navigationRoute;
       anchor.classList.toggle('active', active);
       if (active) anchor.setAttribute('aria-current', 'page');
       else anchor.removeAttribute('aria-current');

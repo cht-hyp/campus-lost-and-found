@@ -454,6 +454,31 @@ const { pathToFileURL } = require('node:url');
       await blocked.getByRole('heading', { name: '暂时无法读取本地数据' }).waitFor();
       await isolated.close();
     });
+    await check('搜索与详情页保留所属导航的选中状态', async () => {
+      const navigation = await context.newPage();
+      await navigation.goto(pathToFileURL(entry).href);
+      await navigation.waitForSelector('.page-heading');
+      const ownId = await navigation.evaluate(() => {
+        const saved = JSON.parse(localStorage.getItem('campus-lost-found:v1'));
+        return saved.posts.find((post) => post.ownerId === saved.ownerId).id;
+      });
+      for (const [route, selected] of [
+        ['#/search?q=校园卡', 'home'],
+        ['#/detail/demo-1', 'home'],
+        [`#/detail/${ownId}`, 'mine'],
+        [`#/edit/${ownId}`, 'mine'],
+        [`#/success/${ownId}`, 'mine']
+      ]) {
+        await navigation.goto(pathToFileURL(entry).href + route);
+        await navigation.waitForSelector('.page-heading');
+        assert.equal(
+          await navigation.locator(`[data-nav="${selected}"]`).getAttribute('aria-current'),
+          'page'
+        );
+        assert.equal(await navigation.locator('.main-nav [aria-current="page"]').count(), 1);
+      }
+      await navigation.close();
+    });
     await check('浏览器没有未捕获脚本错误', async () => assert.deepEqual(errors, []));
     const report = {
       browser: await browser.version(),

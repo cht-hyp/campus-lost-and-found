@@ -65,6 +65,7 @@ js/
   app.js                页面导航、事件、表单及状态同步
 tests/                  Node 自动化单元测试
 scripts/browser-check.cjs  可选的真实 Chrome 验收脚本
+scripts/layout-check.cjs   可选的多宽度布局检查脚本
 package.json            开发测试命令，无网页运行依赖
 ```
 
@@ -85,10 +86,12 @@ npm run test:coverage
 npm install --no-save --package-lock=false playwright-core
 $env:CHROME_PATH = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
 node scripts/browser-check.cjs
+node scripts/layout-check.cjs
 ```
 
 测试创建独立的临时浏览器上下文，不访问日常 Chrome 用户数据；截图和 JSON 报告在运行时写入 `artifacts`，该目录不纳入 Git。如 Chrome 装在其他位置，修改 `CHROME_PATH`。可通过 `CAMPUS_ENTRY` 指定另一份下载项目的 `index.html`。Linux / macOS 使用对应的环境变量设置方式和 Chrome 可执行文件路径。
 
+布局检查覆盖 320–1920px 的 8 个屏幕宽度，检查首页、搜索、发布、详情和我的发布是否横向溢出、导航是否被遮挡。`CAMPUS_ENTRY` 只用于流程验收；布局检查始终运行当前项目。
 
 ## 存储问题
 
