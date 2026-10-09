@@ -509,6 +509,9 @@ select {
 .claim-form textarea {
   resize: vertical;
 }
+.claim-form input {
+  height: 44px;
+}
 .claim-list {
   list-style: none;
   margin: 16px 0 0;
@@ -576,7 +579,7 @@ select {
   text-align: center;
 }
 .stat-value {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 650;
   color: var(--blue);
 }
@@ -1307,7 +1310,7 @@ mark {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .stat-value {
-    font-size: 24px;
+    font-size: 20px;
   }
   .bar-row {
     grid-template-columns: 64px minmax(0, 1fr) 32px;
@@ -1316,6 +1319,7 @@ mark {
 }
 [data-theme='dark'] {
   color-scheme: dark;
+  background: #14181f;
   --blue: #5b9bff;
   --line: #2c3440;
   --muted: #9aa5b5;

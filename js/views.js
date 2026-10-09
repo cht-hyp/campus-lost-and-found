@@ -96,8 +96,8 @@
     return `<section class="surface data-card"><h2>数据管理</h2>
       <p>数据仅保存在当前浏览器。导出备份可迁移到其他设备，也可导入已有备份恢复。</p>
       <div class="data-actions">
-        <button type="button" class="button secondary" data-action="export-data">${icon('download')}导出备份</button>
-        <button type="button" class="button secondary" data-action="choose-import">${icon('upload')}导入备份</button>
+        <button type="button" class="button secondary small-button" data-action="export-data">${icon('download')}导出备份</button>
+        <button type="button" class="button secondary small-button" data-action="choose-import">${icon('upload')}导入备份</button>
         <input id="import-file" type="file" accept=".json,application/json" hidden>
       </div></section>`;
   }
