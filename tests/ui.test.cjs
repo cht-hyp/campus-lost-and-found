@@ -81,3 +81,11 @@ test('非法排序与日期被忽略', () => {
   assert.equal(filters.dateFrom, '');
   assert.equal(filters.dateTo, '');
 });
+test('关键词高亮包裹匹配片段并保留原文', () => {
+  assert.equal(UI.highlight('蓝牙耳机', '耳机'), '蓝牙<mark>耳机</mark>');
+  assert.equal(UI.highlight('AirPods 白色', 'airpods'), '<mark>AirPods</mark> 白色');
+});
+test('高亮不区分大小写，空关键词仅转义不包裹', () => {
+  assert.equal(UI.highlight('钥匙 & 卡', '&'), '钥匙 <mark>&amp;</mark> 卡');
+  assert.equal(UI.highlight('<img>&', ''), '&lt;img&gt;&amp;');
+});

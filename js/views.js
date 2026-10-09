@@ -18,12 +18,12 @@
   function typeBadge(post) {
     return `<span class="type-badge ${post.type}">${post.type === 'lost' ? '寻物' : '招领'}</span>`;
   }
-  function card(post, mine = false) {
+  function card(post, mine = false, keyword = '') {
     return `<article class="post-card">
       <a class="card-link" href="${link('detail', post.id)}" aria-label="查看${e(post.title)}详情">
         <div class="card-art">${U.itemVisual(post.category, post.image, post.title + '照片')}</div>
-        <div class="card-body"><div class="card-title-row"><h3>${e(post.title)}</h3>${badge(post)}</div>
-          <div class="card-meta">${icon('pin')}<span>${e(post.location)}</span></div>
+        <div class="card-body"><div class="card-title-row"><h3>${U.highlight(post.title, keyword)}</h3>${badge(post)}</div>
+          <div class="card-meta">${icon('pin')}<span>${U.highlight(post.location, keyword)}</span></div>
           <div class="card-meta">${icon('clock')}<span>${U.formatDate(post.occurredAt)}</span></div>
           <div class="card-tags">${typeBadge(post)}<span>${e(post.category)}</span>${post.ownerId === 'demo' ? '<span class="demo-badge">示例</span>' : ''}</div>
         </div>
@@ -31,8 +31,8 @@
       ${mine ? `<div class="card-management"><a class="button secondary small-button" href="${link('edit', post.id)}">编辑信息</a><button type="button" class="button secondary small-button" data-action="resolve" data-id="${e(post.id)}" ${post.status === 'resolved' ? 'disabled' : ''}>${post.status === 'resolved' ? '已完成' : '标记为' + (post.type === 'lost' ? '已找到' : '已归还')}</button></div>` : ''}
     </article>`;
   }
-  function cards(posts, mine = false) {
-    return `<div class="cards-grid">${posts.map((post) => card(post, mine)).join('')}</div>`;
+  function cards(posts, mine = false, keyword = '') {
+    return `<div class="cards-grid">${posts.map((post) => card(post, mine, keyword)).join('')}</div>`;
   }
   function options(values, value, label) {
     return `<option value="">${label}</option>${values.map((item) => `<option value="${e(item)}" ${item === value ? 'selected' : ''}>${e(item)}</option>`).join('')}`;
@@ -74,7 +74,7 @@
   function list(state, filters, heading) {
     const result = C.filterPosts(state.posts, filters);
     return `${filtersForm(filters)}<div class="list-heading"><h2>${heading}</h2><span>${result.length} 条信息</span></div>
-      ${result.length ? cards(result) : empty('暂时没有匹配的信息', '请更换关键词或筛选条件。', '<button type="button" class="button secondary" data-action="clear-filters">清空筛选</button>')}`;
+      ${result.length ? cards(result, false, filters.keyword) : empty('暂时没有匹配的信息', '请更换关键词或筛选条件。', '<button type="button" class="button secondary" data-action="clear-filters">清空筛选</button>')}`;
   }
   function home(state) {
     return `${pageHeader('校园失物招领')}${list(state, { type: 'all', keyword: '', category: '', location: '' }, '最近发布')}`;

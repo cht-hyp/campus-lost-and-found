@@ -843,6 +843,12 @@ select {
   padding: 20px;
   color: #b14141;
 }
+mark {
+  background: #ffe08a;
+  color: inherit;
+  padding: 0 1px;
+  border-radius: 2px;
+}
 .sr-only {
   position: absolute;
   width: 1px;

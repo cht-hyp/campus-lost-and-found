@@ -11,6 +11,23 @@
       (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]
     );
   }
+  function escapeRegExp(value) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+  function highlight(text, keyword) {
+    const raw = String(text == null ? '' : text);
+    const query = String(keyword == null ? '' : keyword).trim();
+    if (!query) return escapeHTML(raw);
+    const regex = new RegExp(escapeRegExp(query), 'ig');
+    const parts = raw.split(regex);
+    const matches = raw.match(regex) || [];
+    let result = '';
+    for (let i = 0; i < parts.length; i += 1) {
+      result += escapeHTML(parts[i]);
+      if (i < matches.length) result += '<mark>' + escapeHTML(matches[i]) + '</mark>';
+    }
+    return result;
+  }
   function parseRoute(hash) {
     const [rawPath, query = ''] = (hash || '#/home').replace(/^#\/?/, '').split('?');
     const parts = rawPath.split('/');
@@ -171,6 +188,7 @@
   }
   return {
     escapeHTML,
+    highlight,
     parseRoute,
     searchFilters,
     searchHash,
