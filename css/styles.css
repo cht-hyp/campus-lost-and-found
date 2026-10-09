@@ -237,6 +237,26 @@ select {
 .filter-selects .text-button {
   font-size: 13px;
 }
+.filter-extra {
+  margin-top: 12px;
+  justify-content: flex-start;
+}
+.filter-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.filter-inline select,
+.filter-inline input {
+  min-height: 34px;
+  font-size: 13px;
+  padding: 4px 8px;
+}
+.filter-inline input[type='date'] {
+  max-width: 150px;
+}
 .list-heading {
   display: flex;
   align-items: center;

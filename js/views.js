@@ -50,11 +50,22 @@
       .join('')}</div>`;
   }
   function filtersForm(filters) {
+    const sortOptions = [
+      ['', '最新发布优先'],
+      ['oldest', '最早发布优先'],
+      ['occurred', '最近发生优先'],
+      ['occurred-asc', '最早发生优先']
+    ];
     return `<form id="filter-form" class="filter-panel" role="search">
       <div class="search-row"><div class="search-input-wrap">${icon('search')}<input type="search" name="keyword" aria-label="搜索物品" placeholder="搜索物品名称、地点或描述" value="${e(filters.keyword)}" maxlength="100" autocomplete="off"></div><button type="submit" class="button primary">搜索</button></div>
       <div class="filter-row">${typeTabs(filters.type, 'type-filter')}<input type="hidden" name="type" value="${filters.type}">
         <div class="filter-selects"><label class="sr-only" for="filter-category">筛选类别</label><select name="category" id="filter-category">${options(C.CATEGORIES, filters.category, '全部类别')}</select>
         <label class="sr-only" for="filter-location">筛选地点</label><select name="location" id="filter-location">${options(C.LOCATIONS, filters.location, '全部地点')}</select><button type="button" class="text-button" data-action="clear-filters">清空筛选</button></div>
+      </div>
+      <div class="filter-row filter-extra">
+        <label class="filter-inline" for="filter-sort"><span>排序</span><select name="sort" id="filter-sort">${sortOptions.map(([value, label]) => `<option value="${value}" ${value === filters.sort ? 'selected' : ''}>${label}</option>`).join('')}</select></label>
+        <label class="filter-inline" for="filter-from"><span>起始日期</span><input type="date" name="dateFrom" id="filter-from" value="${e(filters.dateFrom)}"></label>
+        <label class="filter-inline" for="filter-to"><span>结束日期</span><input type="date" name="dateTo" id="filter-to" value="${e(filters.dateTo)}"></label>
       </div></form>`;
   }
   function empty(title, description, action) {

@@ -30,12 +30,19 @@
       name = 'not-found';
     return { name, id, params };
   }
+  const SORT_KEYS = ['oldest', 'occurred', 'occurred-asc'];
+  function validDate(value) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(value || '') ? value : '';
+  }
   function searchFilters(params) {
     return {
       keyword: params.get('q') || '',
       category: params.get('category') || '',
       location: params.get('location') || '',
-      type: ['lost', 'found'].includes(params.get('type')) ? params.get('type') : 'all'
+      type: ['lost', 'found'].includes(params.get('type')) ? params.get('type') : 'all',
+      sort: SORT_KEYS.includes(params.get('sort')) ? params.get('sort') : '',
+      dateFrom: validDate(params.get('from')),
+      dateTo: validDate(params.get('to'))
     };
   }
   function searchHash(filters) {
@@ -44,6 +51,9 @@
     if (filters.category) params.set('category', filters.category);
     if (filters.location) params.set('location', filters.location);
     if (filters.type && filters.type !== 'all') params.set('type', filters.type);
+    if (filters.sort) params.set('sort', filters.sort);
+    if (filters.dateFrom) params.set('from', filters.dateFrom);
+    if (filters.dateTo) params.set('to', filters.dateTo);
     return '#/search' + (params.size ? `?${params}` : '');
   }
   async function copyContact(value, clipboard) {

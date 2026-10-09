@@ -232,3 +232,38 @@ for (const [name, image] of [
     );
   });
 }
+
+test('默认按发布时间倒序，可切换为最早发布优先', () => {
+  assert.deepEqual(
+    Core.filterPosts(records, { sort: 'oldest' }).map((p) => p.id),
+    ['old', 'middle', 'new']
+  );
+});
+test('支持按发生时间排序', () => {
+  const items = [
+    post({ id: 'a', occurredAt: '2026-10-06T09:00', createdAt: '2026-10-08T02:00:00.000Z' }),
+    post({ id: 'b', occurredAt: '2026-10-08T09:00', createdAt: '2026-10-08T03:00:00.000Z' }),
+    post({ id: 'c', occurredAt: '2026-10-07T09:00', createdAt: '2026-10-08T04:00:00.000Z' })
+  ];
+  assert.deepEqual(
+    Core.filterPosts(items, { sort: 'occurred' }).map((p) => p.id),
+    ['b', 'c', 'a']
+  );
+  assert.deepEqual(
+    Core.filterPosts(items, { sort: 'occurred-asc' }).map((p) => p.id),
+    ['a', 'c', 'b']
+  );
+});
+test('日期范围按发生日期过滤', () => {
+  const items = [
+    post({ id: 'a', occurredAt: '2026-10-05T09:00' }),
+    post({ id: 'b', occurredAt: '2026-10-07T09:00' }),
+    post({ id: 'c', occurredAt: '2026-10-09T09:00' })
+  ];
+  assert.deepEqual(
+    Core.filterPosts(items, { dateFrom: '2026-10-06', dateTo: '2026-10-08' }).map((p) => p.id),
+    ['b']
+  );
+  assert.deepEqual(Core.filterPosts(items, { dateFrom: '2026-10-08' }).map((p) => p.id), ['c']);
+  assert.deepEqual(Core.filterPosts(items, { dateTo: '2026-10-06' }).map((p) => p.id), ['a']);
+});

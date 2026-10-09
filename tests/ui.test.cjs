@@ -31,7 +31,10 @@ test('查询链接正确编码中文与 &，往返保留关键词', () => {
     keyword: '钥匙 & 卡',
     category: '钥匙',
     location: '图书馆',
-    type: 'found'
+    type: 'found',
+    sort: '',
+    dateFrom: '',
+    dateTo: ''
   });
 });
 test('未知类型不作为筛选条件隐藏所有记录', () => {
@@ -57,4 +60,24 @@ test('剪贴板拒绝时保留可人工复制的完整文本', async () => {
 });
 test('没有剪贴板 API 时同样提供人工复制文本', async () => {
   assert.deepEqual(await UI.copyContact('QQ 123', undefined), { copied: false, text: 'QQ 123' });
+});
+test('排序与日期范围在查询链接中往返保留', () => {
+  const route = UI.parseRoute(
+    UI.searchHash({ sort: 'occurred', dateFrom: '2026-10-01', dateTo: '2026-10-08' })
+  );
+  assert.deepEqual(UI.searchFilters(route.params), {
+    keyword: '',
+    category: '',
+    location: '',
+    type: 'all',
+    sort: 'occurred',
+    dateFrom: '2026-10-01',
+    dateTo: '2026-10-08'
+  });
+});
+test('非法排序与日期被忽略', () => {
+  const filters = UI.searchFilters(new URLSearchParams('sort=hacked&from=not-a-date&to=2026-13-99'));
+  assert.equal(filters.sort, '');
+  assert.equal(filters.dateFrom, '');
+  assert.equal(filters.dateTo, '');
 });

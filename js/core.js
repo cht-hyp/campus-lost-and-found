@@ -146,11 +146,25 @@
     return post.status === 'resolved' ? '已归还' : '待认领';
   }
 
+  function sortPosts(posts, sort) {
+    const result = [...posts];
+    if (sort === 'oldest')
+      result.sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
+    else if (sort === 'occurred')
+      result.sort((a, b) => Date.parse(b.occurredAt) - Date.parse(a.occurredAt));
+    else if (sort === 'occurred-asc')
+      result.sort((a, b) => Date.parse(a.occurredAt) - Date.parse(b.occurredAt));
+    else result.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+    return result;
+  }
+
   function filterPosts(posts, filters = {}) {
     const keyword = text(filters.keyword).toLocaleLowerCase();
     const location = text(filters.location).toLocaleLowerCase();
-    return posts
-      .filter(
+    const dateFrom = text(filters.dateFrom);
+    const dateTo = text(filters.dateTo);
+    return sortPosts(
+      posts.filter(
         (post) =>
           (!filters.type || filters.type === 'all' || post.type === filters.type) &&
           (!filters.category || post.category === filters.category) &&
@@ -159,9 +173,12 @@
           (!keyword ||
             [post.title, post.location, post.description].some((value) =>
               value.toLocaleLowerCase().includes(keyword)
-            ))
-      )
-      .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+            )) &&
+          (!dateFrom || post.occurredAt.slice(0, 10) >= dateFrom) &&
+          (!dateTo || post.occurredAt.slice(0, 10) <= dateTo)
+      ),
+      filters.sort
+    );
   }
 
   return {
