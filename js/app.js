@@ -5,6 +5,7 @@
   const V = window.CampusViews;
   const Backup = window.CampusBackup;
   const Comments = window.CampusComments;
+  const Claims = window.CampusClaims;
   const app = document.getElementById('app');
   let repository;
   let state;
@@ -419,6 +420,55 @@
       toast(error.message);
     }
   }
+  async function submitClaim(form) {
+    const postId = form.dataset.postId;
+    const post = findPost(postId);
+    if (!post || busy) return;
+    const input = {
+      postId,
+      claimerId: state.ownerId,
+      contact: form.elements.contact.value,
+      note: form.elements.note.value
+    };
+    const errors = Claims.validateClaim(input);
+    document.getElementById('error-contact').textContent = errors.contact || '';
+    document.getElementById('error-note').textContent = errors.note || '';
+    if (Object.keys(errors).length) return;
+    try {
+      const claim = Claims.createClaim(input);
+      commit((posts) => Claims.submitClaim(posts, postId, claim));
+      render();
+      toast('认领申请已提交');
+    } catch (error) {
+      toast(error.message);
+    }
+  }
+  async function decideClaim(postId, claimId, decision) {
+    if (busy) return;
+    try {
+      commit((posts, ownerId) => Claims.decideClaim(posts, postId, claimId, decision, ownerId));
+      render();
+      toast(decision === 'accepted' ? '已确认认领，信息标记为完成' : '已拒绝认领申请');
+    } catch (error) {
+      toast(error.message);
+    }
+  }
+  function demoClaim(postId) {
+    if (busy) return;
+    try {
+      const claim = Claims.createClaim({
+        postId,
+        claimerId: 'demo-claimer',
+        contact: '示例：QQ 87654321（模拟认领者）',
+        note: '这是演示用的模拟认领申请，用于展示发布者确认流程。'
+      });
+      commit((posts) => Claims.submitClaim(posts, postId, claim));
+      render();
+      toast('已生成模拟认领申请');
+    } catch (error) {
+      toast(error.message);
+    }
+  }
 
   document.addEventListener('click', async (event) => {
     const skip = event.target.closest('.skip-link');
@@ -470,6 +520,9 @@
     else if (action === 'export-data') exportData();
     else if (action === 'choose-import') document.getElementById('import-file').click();
     else if (action === 'toggle-theme') toggleTheme();
+    else if (action === 'accept-claim') await decideClaim(button.dataset.postId, button.dataset.claimId, 'accepted');
+    else if (action === 'reject-claim') await decideClaim(button.dataset.postId, button.dataset.claimId, 'rejected');
+    else if (action === 'demo-claim') demoClaim(button.dataset.postId);
     else if (action === 'retry') boot();
   });
   document.addEventListener('submit', async (event) => {
@@ -482,6 +535,9 @@
     } else if (event.target.id === 'comment-form') {
       event.preventDefault();
       await submitComment(event.target);
+    } else if (event.target.id === 'claim-form') {
+      event.preventDefault();
+      await submitClaim(event.target);
     }
   });
   document.addEventListener('input', (event) => {

@@ -132,7 +132,43 @@
       </div></article>
       <aside class="aside-stack"><section class="surface contact-card"><h2>联系方式</h2><p class="contact-value">${e(post.contact)}</p><button type="button" class="button primary full-width" data-action="copy" data-id="${e(post.id)}">${icon('copy')}复制联系方式</button></section>
         ${own ? `<section class="surface owner-card"><div class="owner-actions"><a class="button secondary full-width" href="${link('edit', post.id)}">编辑信息</a><button type="button" class="button primary full-width" data-action="resolve" data-id="${e(post.id)}" ${post.status === 'resolved' ? 'disabled' : ''}>${post.status === 'resolved' ? '已完成' : '标记为' + (post.type === 'lost' ? '已找到' : '已归还')}</button></div></section>` : ''}
-      </aside></div>${commentsSection(post, ownerId)}`;
+      </aside></div>${own ? ownerClaims(post) : claimForm(post, ownerId)}${commentsSection(post, ownerId)}`;
+  }
+  function claimStatusLabel(status) {
+    return status === 'accepted' ? '已确认' : status === 'rejected' ? '已拒绝' : '处理中';
+  }
+  function ownerClaims(post) {
+    const claims = post.claims || [];
+    const items = claims
+      .map(
+        (claim) =>
+          `<li class="claim"><div class="claim-head"><span class="claim-contact">${e(claim.contact)}</span><span class="claim-status ${claim.status}">${claimStatusLabel(claim.status)}</span></div>
+          ${claim.note ? `<p class="claim-note">${e(claim.note)}</p>` : ''}
+          <div class="claim-meta">${U.formatDate(claim.createdAt, true)}</div>
+          ${claim.status === 'pending' ? `<div class="claim-actions"><button type="button" class="button primary small-button" data-action="accept-claim" data-post-id="${e(post.id)}" data-claim-id="${e(claim.id)}">确认并完成</button><button type="button" class="button secondary small-button" data-action="reject-claim" data-post-id="${e(post.id)}" data-claim-id="${e(claim.id)}">拒绝</button></div>` : ''}
+          </li>`
+      )
+      .join('');
+    return `<section class="surface claims-card"><h2>认领申请（${claims.length}）</h2>
+      ${post.status !== 'resolved' ? `<button type="button" class="button secondary small-button" data-action="demo-claim" data-post-id="${e(post.id)}">模拟收到认领申请</button>` : ''}
+      ${claims.length ? `<ul class="claim-list">${items}</ul>` : '<p class="comment-empty">还没有认领申请。</p>'}</section>`;
+  }
+  function claimForm(post, ownerId) {
+    const mine = (post.claims || []).find((claim) => claim.claimerId === ownerId);
+    if (mine)
+      return `<section class="surface claims-card"><h2>我的认领申请</h2>
+        <p class="claim-submitted">已提交申请（${claimStatusLabel(mine.status)}）。联系方式：${e(mine.contact)}</p></section>`;
+    if (post.status === 'resolved') return '';
+    const verb = post.type === 'lost' ? '我捡到了' : '我想认领';
+    return `<section class="surface claims-card"><h2>${verb}</h2>
+      <p class="claim-hint">留下联系方式，发布者确认后双方即可完成交接。</p>
+      <form id="claim-form" class="claim-form" data-post-id="${e(post.id)}">
+        <input id="claim-contact" name="contact" placeholder="手机号、微信号或 QQ 号" maxlength="100" aria-label="联系方式" required>
+        <span id="error-contact" class="field-error" data-error-for="contact"></span>
+        <textarea id="claim-note" name="note" rows="2" maxlength="200" placeholder="补充说明（可选）" aria-label="补充说明"></textarea>
+        <span id="error-note" class="field-error" data-error-for="note"></span>
+        <div class="comment-actions"><button type="submit" class="button primary small-button">提交认领申请</button></div>
+      </form></section>`;
   }
   function commentsSection(post, ownerId) {
     const comments = post.comments || [];

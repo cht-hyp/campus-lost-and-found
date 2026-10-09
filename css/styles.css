@@ -480,6 +480,86 @@ select {
   color: var(--muted);
   font-size: 13px;
 }
+.claims-card {
+  margin-top: 24px;
+  padding: 22px 24px;
+}
+.claims-card h2 {
+  margin-bottom: 16px;
+  font-size: 17px;
+  font-weight: 600;
+}
+.claim-hint,
+.claim-submitted {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+.claim-form input,
+.claim-form textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  color: inherit;
+  border: 1px solid #dbe1e9;
+  border-radius: 6px;
+  background: white;
+  margin-bottom: 12px;
+}
+.claim-form textarea {
+  resize: vertical;
+}
+.claim-list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+.claim {
+  padding: 14px 0;
+  border-bottom: 1px solid #edf0f4;
+}
+.claim-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.claim-contact {
+  font-weight: 600;
+  font-size: 14px;
+}
+.claim-status {
+  font-size: 12px;
+  border-radius: 5px;
+  padding: 2px 7px;
+  background: #edf4ff;
+  color: #2168c9;
+}
+.claim-status.accepted {
+  background: #eef7f1;
+  color: #4a856c;
+}
+.claim-status.rejected {
+  background: #f6eeee;
+  color: #b05a5a;
+}
+.claim-note {
+  margin: 0 0 4px;
+  color: #596779;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.claim-meta {
+  color: var(--muted);
+  font-size: 12px;
+}
+.claim-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1370,4 +1450,31 @@ mark {
 [data-theme='dark'] mark {
   background: #6b5312;
   color: #ffe08a;
+}
+[data-theme='dark'] .claim-list {
+  border-top-color: #2c3440;
+}
+[data-theme='dark'] .claim {
+  border-bottom-color: #2c3440;
+}
+[data-theme='dark'] .claim-form input,
+[data-theme='dark'] .claim-form textarea {
+  background: #232a35;
+  border-color: #2c3440;
+  color: #e6ebf2;
+}
+[data-theme='dark'] .claim-status {
+  background: #24334a;
+  color: #9cc2ff;
+}
+[data-theme='dark'] .claim-status.accepted {
+  background: #1e332b;
+  color: #8fd0ab;
+}
+[data-theme='dark'] .claim-status.rejected {
+  background: #3a2121;
+  color: #e0a0a0;
+}
+[data-theme='dark'] .claim-note {
+  color: #b6c0cf;
 }

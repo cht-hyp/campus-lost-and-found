@@ -20,6 +20,19 @@
     );
   }
 
+  function validClaim(claim) {
+    return (
+      !!claim &&
+      nonempty(claim.id) &&
+      nonempty(claim.claimerId) &&
+      ['pending', 'accepted', 'rejected'].includes(claim.status) &&
+      typeof claim.contact === 'string' &&
+      claim.contact.trim().length > 0 &&
+      typeof claim.note === 'string' &&
+      isTimestamp(claim.createdAt)
+    );
+  }
+
   function validState(state) {
     if (!state || state.version !== 1 || !nonempty(state.ownerId) || !Array.isArray(state.posts))
       return false;
@@ -35,6 +48,9 @@
         return false;
       if (post.comments !== undefined) {
         if (!Array.isArray(post.comments) || !post.comments.every(validComment)) return false;
+      }
+      if (post.claims !== undefined) {
+        if (!Array.isArray(post.claims) || !post.claims.every(validClaim)) return false;
       }
       // 已保存的时间不应因为系统时钟回拨而无法读取；新建与编辑仍按当前时间校验。
       return Object.keys(Core.validatePost(post, new Date(9999, 11, 31))).length === 0;
