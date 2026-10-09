@@ -2,6 +2,7 @@
   'use strict';
   const C = root.CampusCore;
   const U = root.CampusUI;
+  const Stats = root.CampusStats;
   const e = U.escapeHTML;
   const icon = U.icon;
   const link = (route, id) => `#/${route}/${encodeURIComponent(id)}`;
@@ -97,6 +98,25 @@
         <input id="import-file" type="file" accept=".json,application/json" hidden>
       </div></section>`;
   }
+  function statTile(label, value) {
+    return `<div class="stat-tile"><div class="stat-value">${value}</div><div class="stat-label">${e(label)}</div></div>`;
+  }
+  function barRow(label, count, max) {
+    const width = max ? Math.round((count / max) * 100) : 0;
+    return `<div class="bar-row"><span class="bar-label">${e(label)}</span><div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div><span class="bar-count">${count}</span></div>`;
+  }
+  function stats(state) {
+    const s = Stats.summarize(state.posts);
+    const maxCategory = Math.max(1, ...Object.values(s.byCategory));
+    const maxLocation = Math.max(1, ...Object.values(s.byLocation));
+    const categoryBars = Object.entries(s.byCategory).map(([k, c]) => barRow(k, c, maxCategory)).join('');
+    const locationBars = Object.entries(s.byLocation).map(([k, c]) => barRow(k, c, maxLocation)).join('');
+    return `${pageHeader('数据统计')}
+      <div class="stat-grid">${statTile('总发布', s.total)}${statTile('进行中', s.open)}${statTile('已解决', s.resolved)}${statTile('找回率', s.recoveredRate + '%')}</div>
+      <section class="surface stats-card"><h2>信息类型</h2><div class="stat-grid two">${statTile('寻物', s.lost)}${statTile('招领', s.found)}</div></section>
+      <section class="surface stats-card"><h2>按类别分布</h2>${categoryBars || '<p class="comment-empty">暂无数据</p>'}</section>
+      <section class="surface stats-card"><h2>按地点分布</h2>${locationBars || '<p class="comment-empty">暂无数据</p>'}</section>`;
+  }
   function detail(post, ownerId) {
     const own = post.ownerId === ownerId;
     const scene = post.type === 'lost' ? '遗失' : '拾取';
@@ -175,5 +195,5 @@
   function fatal(error) {
     return `<section class="surface fatal-panel"><h1>暂时无法读取本地数据</h1><p>${e(error.message)}</p><button type="button" class="button primary" data-action="retry">重试</button></section>`;
   }
-  root.CampusViews = { home, search, mine, detail, editor, success, notFound, fatal };
+  root.CampusViews = { home, search, mine, stats, detail, editor, success, notFound, fatal };
 })(globalThis);

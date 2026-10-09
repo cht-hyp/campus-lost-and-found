@@ -145,6 +145,7 @@
     else if (route.name === 'search')
       app.innerHTML = V.search(state, U.searchFilters(route.params));
     else if (route.name === 'mine') app.innerHTML = V.mine(state, U.searchFilters(route.params));
+    else if (route.name === 'stats') app.innerHTML = V.stats(state);
     else if (route.name === 'publish')
       app.innerHTML = V.editor(null, route.params.get('type') === 'found' ? 'found' : 'lost');
     else if (route.name === 'detail' && post) app.innerHTML = V.detail(post, state.ownerId);
@@ -162,6 +163,7 @@
       search: '寻找物品',
       publish: '发布信息',
       mine: '我的发布',
+      stats: '数据统计',
       edit: '编辑信息',
       success: '发布成功',
       detail: post ? post.title : '信息详情'
