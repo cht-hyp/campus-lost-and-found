@@ -95,7 +95,7 @@
     const value = post || { type: preferredType, occurredAt: U.localNow() };
     const scene = value.type === 'found' ? '拾取' : '遗失';
     function field(name, label, content, wide = false) {
-      return `<div class="field ${wide ? 'wide' : ''}"><label for="post-${name}"><span ${name === 'location' || name === 'occurredAt' ? `data-scene-label="${name}"` : ''}>${label}</span><span class="required" aria-hidden="true">*</span></label>${content}<span id="error-${name}" class="field-error" data-error-for="${name}"></span></div>`;
+      return `<div class="field field-${name} ${wide ? 'wide' : ''}"><label for="post-${name}"><span ${name === 'location' || name === 'occurredAt' ? `data-scene-label="${name}"` : ''}>${label}</span><span class="required" aria-hidden="true">*</span></label>${content}<span id="error-${name}" class="field-error" data-error-for="${name}"></span></div>`;
     }
     function input(name, placeholder, extra = '') {
       return `<input id="post-${name}" name="${name}" value="${e(value[name] || '')}" placeholder="${placeholder}" aria-describedby="error-${name}" required ${extra}>`;
@@ -111,10 +111,6 @@
         )
         .join('')}</div></fieldset>
       <div id="form-summary" class="form-summary" role="alert" tabindex="-1"></div><div class="fields-grid">
-        ${field('title', '物品名称', input('title', '请输入物品名称', 'maxlength="60" autocomplete="off"'))}
-        ${field('category', '物品类别', `<select id="post-category" name="category" required aria-describedby="error-category">${options(C.CATEGORIES, value.category, '请选择物品类别')}</select>`)}
-        ${field('location', scene + '地点', input('location', '请输入具体地点', 'maxlength="80" autocomplete="off" list="campus-locations"') + `<datalist id="campus-locations">${C.LOCATIONS.map((x) => `<option value="${x}">`).join('')}</datalist>`)}
-        ${field('occurredAt', scene + '时间', input('occurredAt', '', `type="datetime-local" min="2000-01-01T00:00" max="${U.localNow()}"`))}
         <div class="field wide photo-field"><label for="post-photo">物品图片<span class="optional-label">（可选）</span></label>
           <div class="photo-control"><div id="photo-preview" class="photo-preview">${U.itemVisual(value.category, value.image)}</div><div class="photo-actions">
             <div class="photo-buttons"><button type="button" class="button secondary" data-action="choose-photo">${icon('image')}选择图片</button><button type="button" class="text-button" data-action="remove-photo" ${value.image ? '' : 'hidden'}>移除图片</button></div>
@@ -123,6 +119,10 @@
           <input id="post-photo" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="photo-hint error-image" hidden>
           <input id="post-image" name="image" type="hidden" value="${e(value.image || '')}"><span id="error-image" class="field-error" data-error-for="image" role="alert"></span>
         </div>
+        ${field('title', '物品名称', input('title', '请输入物品名称', 'maxlength="60" autocomplete="off"'))}
+        ${field('category', '物品类别', `<select id="post-category" name="category" required aria-describedby="error-category">${options(C.CATEGORIES, value.category, '请选择物品类别')}</select>`)}
+        ${field('location', scene + '地点', input('location', '请输入具体地点', 'maxlength="80" autocomplete="off" list="campus-locations"') + `<datalist id="campus-locations">${C.LOCATIONS.map((x) => `<option value="${x}">`).join('')}</datalist>`)}
+        ${field('occurredAt', scene + '时间', input('occurredAt', '', `type="datetime-local" min="2000-01-01T00:00" max="${U.localNow()}"`))}
         ${field('description', '物品描述', `<textarea id="post-description" name="description" rows="4" maxlength="1000" placeholder="请输入颜色、外观等物品特征" required aria-describedby="error-description">${e(value.description || '')}</textarea>`, true)}
         ${field('contact', '联系方式', input('contact', '手机号、微信号或 QQ 号', 'maxlength="100" autocomplete="off"'), true)}
       </div><div class="form-actions"><button type="button" class="button secondary" data-action="cancel-form">取消</button><button type="submit" class="button primary">${editing ? '保存修改' : '立即发布'}</button></div>

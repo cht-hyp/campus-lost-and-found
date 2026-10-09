@@ -4,13 +4,13 @@
 
 一个可直接用 **Chrome 打开 HTML** 的校园失物招领网页。保留原型的蓝白配色与卡片布局，支持电脑和手机宽度；无服务器、数据库、构建步骤或网络依赖。
 
-![电脑端首页](artifacts/home-desktop.png)
+![电脑端首页](artifacts/layout-home-desktop.png)
 
 ## 立即运行
 
 1. 在 GitHub 选择 **Code → Download ZIP**，解压整个项目；也可以使用 Git clone。
 2. 找到解压目录中的 `index.html`，右键选择 **打开方式 → Google Chrome**。
-3. 首页会显示 8 条标注“示例”的信息。点击底部“发布信息”，选择“寻物”或“招领”即可发布。
+3. 首页会显示 8 条标注“示例”的信息。点击导航中的“发布信息”，选择“寻物”或“招领”即可发布。桌面导航在左侧，窄屏导航在底部。
 
 **使用网页不需要安装 Node，不需要运行 npm install，也不需要启动本地服务器。** 请保留 `css`、`js` 目录与入口的相对位置，不要只下载一个 HTML 文件。
 
@@ -85,9 +85,12 @@ npm run test:coverage
 npm install --no-save --package-lock=false playwright-core
 $env:CHROME_PATH = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
 node scripts/browser-check.cjs
+node scripts/layout-check.cjs
 ```
 
 测试创建独立的临时浏览器上下文，不访问日常 Chrome 用户数据；截图和 JSON 报告写入 `artifacts`。如 Chrome 装在其他位置，修改 `CHROME_PATH`。可通过 `CAMPUS_ENTRY` 指定另一份下载项目的 `index.html`。Linux / macOS 使用对应的环境变量设置方式和 Chrome 可执行文件路径。
+
+布局检查覆盖 320–1920px 的 8 个屏幕宽度，检查首页、搜索、发布、详情和我的发布是否横向溢出、导航是否被遮挡。`CAMPUS_ENTRY` 只用于流程验收；布局检查始终运行当前项目。
 
 ## 存储问题
 
