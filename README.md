@@ -1,16 +1,14 @@
 # 校园失物招领
 
-[GitHub 仓库](https://github.com/cht-hyp/campus-lost-and-found) · [协作说明](docs/github-collaboration.md)
+[GitHub 仓库](https://github.com/cht-hyp/campus-lost-and-found)
 
 一个可直接用 **Chrome 打开 HTML** 的校园失物招领网页。保留原型的蓝白配色与卡片布局，支持电脑和手机宽度；无服务器、数据库、构建步骤或网络依赖。
-
-![电脑端首页](artifacts/layout-home-desktop.png)
 
 ## 立即运行
 
 1. 在 GitHub 选择 **Code → Download ZIP**，解压整个项目；也可以使用 Git clone。
 2. 找到解压目录中的 `index.html`，右键选择 **打开方式 → Google Chrome**。
-3. 首页会显示 8 条标注“示例”的信息。点击导航中的“发布信息”，选择“寻物”或“招领”即可发布。桌面导航在左侧，窄屏导航在底部。
+3. 首页会显示 8 条标注“示例”的信息。点击导航中的“发布信息”，选择“寻物”或“招领”即可发布。
 
 **使用网页不需要安装 Node，不需要运行 npm install，也不需要启动本地服务器。** 请保留 `css`、`js` 目录与入口的相对位置，不要只下载一个 HTML 文件。
 
@@ -39,7 +37,7 @@
 - 请继续用同一 Chrome 配置和同一文件路径管理发布。移动文件夹可能进入新的存储区域；清除浏览器数据会删除本地发布。
 - “只能管理自己的信息”用于本机流程演示，是浏览器标识判断，不是线上账号认证或真正的访问控制系统。
 - 示例信息与联系方式均为演示内容，不代表真实失物。
-- `file://` 的本地存储行为取决于浏览器，已通过真实 Chrome 直接打开文件的验收。实际测试版本与时间见 [测试报告](docs/test-report.md)。
+- `file://` 的本地存储行为取决于浏览器，已通过真实 Chrome 直接打开文件的验收。测试结果可按下方命令在本机生成。
 
 ## 目录说明
 
@@ -56,15 +54,7 @@ js/
   app.js                页面导航、事件、表单及状态同步
 tests/                  Node 自动化单元测试
 scripts/browser-check.cjs  可选的真实 Chrome 验收脚本
-artifacts/              实际页面截图、测试输出及验收结果
-docs/
-  design.md             设计约定
-  psp.md                开发前预估及真实过程记录
-  test-report.md        测试教程、设计与结果
-  blog-draft.md         本次作业博客草稿
-  github-collaboration.md  两人 fork / PR 协作说明
-  superpowers/plans/    已确认方案的实现任务记录
-requirement.md          原始作业要求，保留不变
+scripts/layout-check.cjs   可选的多宽度布局检查脚本
 package.json            开发测试命令，无网页运行依赖
 ```
 
@@ -88,7 +78,7 @@ node scripts/browser-check.cjs
 node scripts/layout-check.cjs
 ```
 
-测试创建独立的临时浏览器上下文，不访问日常 Chrome 用户数据；截图和 JSON 报告写入 `artifacts`。如 Chrome 装在其他位置，修改 `CHROME_PATH`。可通过 `CAMPUS_ENTRY` 指定另一份下载项目的 `index.html`。Linux / macOS 使用对应的环境变量设置方式和 Chrome 可执行文件路径。
+测试创建独立的临时浏览器上下文，不访问日常 Chrome 用户数据；截图和 JSON 报告在运行时写入 `artifacts`，该目录不纳入 Git。如 Chrome 装在其他位置，修改 `CHROME_PATH`。可通过 `CAMPUS_ENTRY` 指定另一份下载项目的 `index.html`。Linux / macOS 使用对应的环境变量设置方式和 Chrome 可执行文件路径。
 
 布局检查覆盖 320–1920px 的 8 个屏幕宽度，检查首页、搜索、发布、详情和我的发布是否横向溢出、导航是否被遮挡。`CAMPUS_ENTRY` 只用于流程验收；布局检查始终运行当前项目。
 
@@ -110,12 +100,3 @@ location.reload()
 ```
 
 **不能自动复制联系方式：** 弹窗中选中文本后按 Ctrl+C，手机可长按复制。
-
-## 作业材料
-
-- [测试报告与简易教程](docs/test-report.md)
-- [PSP 与执行记录](docs/psp.md)
-- [博客草稿](docs/blog-draft.md)
-- [GitHub 结对协作步骤](docs/github-collaboration.md)
-
-代码和自动化记录已由工具辅助完成。两位成员的实际工时、真实协作记录、博客链接及互评需要本人补充，草稿中明确区分了这些内容。

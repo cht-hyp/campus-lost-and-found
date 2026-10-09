@@ -1,6 +1,10 @@
 node_modules/
 .superpowers/
-artifacts/tmp/
+artifacts/
 *.log
 .DS_Store
 Thumbs.db
+
+# 本地作业材料，不随网页提交
+/docs/
+/requirement.md

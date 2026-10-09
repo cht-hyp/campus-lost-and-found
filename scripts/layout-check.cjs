@@ -8,6 +8,7 @@ const { pathToFileURL } = require('node:url');
 (async () => {
   const project = path.resolve(__dirname, '..');
   const output = path.join(project, 'artifacts');
+  await fs.mkdir(output, { recursive: true });
   const url = pathToFileURL(path.join(project, 'index.html')).href;
   const browser = await chromium.launch({
     executablePath:
