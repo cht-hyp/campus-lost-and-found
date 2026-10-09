@@ -109,7 +109,20 @@
       </div></article>
       <aside class="aside-stack"><section class="surface contact-card"><h2>联系方式</h2><p class="contact-value">${e(post.contact)}</p><button type="button" class="button primary full-width" data-action="copy" data-id="${e(post.id)}">${icon('copy')}复制联系方式</button></section>
         ${own ? `<section class="surface owner-card"><div class="owner-actions"><a class="button secondary full-width" href="${link('edit', post.id)}">编辑信息</a><button type="button" class="button primary full-width" data-action="resolve" data-id="${e(post.id)}" ${post.status === 'resolved' ? 'disabled' : ''}>${post.status === 'resolved' ? '已完成' : '标记为' + (post.type === 'lost' ? '已找到' : '已归还')}</button></div></section>` : ''}
-      </aside></div>`;
+      </aside></div>${commentsSection(post, ownerId)}`;
+  }
+  function commentsSection(post, ownerId) {
+    const comments = post.comments || [];
+    const items = comments
+      .map(
+        (comment) =>
+          `<li class="comment"><div class="comment-head"><span class="comment-author">${comment.authorId === ownerId ? '我' : '其他用户'}</span><span class="comment-time">${U.formatDate(comment.createdAt, true)}</span></div><p class="comment-text">${e(comment.text)}</p></li>`
+      )
+      .join('');
+    return `<section class="surface comments-card"><h2>留言（${comments.length}）</h2>
+      <form id="comment-form" class="comment-form" data-post-id="${e(post.id)}"><textarea id="comment-text" name="text" rows="2" maxlength="200" placeholder="补充线索或说明，例如物品细节、联系方式" aria-label="留言内容" required></textarea><span id="error-text" class="field-error" data-error-for="text"></span>
+        <div class="comment-actions"><button type="submit" class="button primary small-button">发表留言</button></div></form>
+      ${comments.length ? `<ul class="comment-list">${items}</ul>` : '<p class="comment-empty">还没有留言。</p>'}</section>`;
   }
   function editor(post, preferredType = 'lost') {
     const editing = Boolean(post);

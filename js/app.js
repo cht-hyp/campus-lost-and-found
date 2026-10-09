@@ -4,6 +4,7 @@
   const U = window.CampusUI;
   const V = window.CampusViews;
   const Backup = window.CampusBackup;
+  const Comments = window.CampusComments;
   const app = document.getElementById('app');
   let repository;
   let state;
@@ -382,6 +383,24 @@
       toast(error.message);
     }
   }
+  async function submitComment(form) {
+    const postId = form.dataset.postId;
+    const post = findPost(postId);
+    if (!post || busy) return;
+    const text = form.elements.text.value;
+    const errors = Comments.validateComment({ text, postId, authorId: state.ownerId });
+    const errorEl = document.getElementById('error-text');
+    errorEl.textContent = errors.text || '';
+    if (Object.keys(errors).length) return;
+    try {
+      const comment = Comments.createComment({ text, postId, authorId: state.ownerId });
+      commit((posts) => Comments.addComment(posts, postId, comment));
+      render();
+      toast('留言已发表');
+    } catch (error) {
+      toast(error.message);
+    }
+  }
 
   document.addEventListener('click', async (event) => {
     const skip = event.target.closest('.skip-link');
@@ -441,6 +460,9 @@
     } else if (event.target.id === 'post-form') {
       event.preventDefault();
       await submitPost(event.target);
+    } else if (event.target.id === 'comment-form') {
+      event.preventDefault();
+      await submitComment(event.target);
     }
   });
   document.addEventListener('input', (event) => {

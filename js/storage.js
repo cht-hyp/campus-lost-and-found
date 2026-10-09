@@ -8,6 +8,18 @@
   const nonempty = (value) => typeof value === 'string' && value.trim().length > 0;
   const isTimestamp = (value) => nonempty(value) && Number.isFinite(Date.parse(value));
 
+  function validComment(comment) {
+    return (
+      !!comment &&
+      nonempty(comment.id) &&
+      nonempty(comment.postId) &&
+      nonempty(comment.authorId) &&
+      typeof comment.text === 'string' &&
+      comment.text.trim().length > 0 &&
+      isTimestamp(comment.createdAt)
+    );
+  }
+
   function validState(state) {
     if (!state || state.version !== 1 || !nonempty(state.ownerId) || !Array.isArray(state.posts))
       return false;
@@ -21,6 +33,9 @@
         !isTimestamp(post.updatedAt)
       )
         return false;
+      if (post.comments !== undefined) {
+        if (!Array.isArray(post.comments) || !post.comments.every(validComment)) return false;
+      }
       // 已保存的时间不应因为系统时钟回拨而无法读取；新建与编辑仍按当前时间校验。
       return Object.keys(Core.validatePost(post, new Date(9999, 11, 31))).length === 0;
     });

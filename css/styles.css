@@ -420,6 +420,66 @@ select {
   flex-wrap: wrap;
   gap: 12px;
 }
+.comments-card {
+  margin-top: 24px;
+  padding: 22px 24px;
+}
+.comments-card h2 {
+  margin-bottom: 16px;
+  font-size: 17px;
+  font-weight: 600;
+}
+.comment-form textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  color: inherit;
+  border: 1px solid #dbe1e9;
+  border-radius: 6px;
+  background: white;
+  resize: vertical;
+}
+.comment-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}
+.comment-list {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+.comment {
+  padding: 14px 0;
+  border-bottom: 1px solid #edf0f4;
+}
+.comment-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.comment-author {
+  font-weight: 600;
+  font-size: 14px;
+}
+.comment-time {
+  color: var(--muted);
+  font-size: 12px;
+}
+.comment-text {
+  margin: 0;
+  color: #596779;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.comment-empty {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
 .surface {
   background: white;
   border: 1px solid var(--line);
