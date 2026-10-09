@@ -261,6 +261,10 @@ select {
   min-height: 34px;
   font-size: 13px;
   padding: 4px 8px;
+  color: inherit;
+  background: white;
+  border: 1px solid #dbe1e9;
+  border-radius: 6px;
 }
 .filter-inline input[type='date'] {
   max-width: 150px;
@@ -876,6 +880,10 @@ select {
 }
 .field [aria-invalid='true'] {
   border-color: #d96565;
+}
+.field select:invalid,
+.field input[type='datetime-local']:invalid {
+  color: #9aa3af;
 }
 .field-error {
   display: block;
@@ -1497,4 +1505,13 @@ mark {
 }
 [data-theme='dark'] .claim-note {
   color: #b6c0cf;
+}
+[data-theme='dark'] .filter-inline input {
+  background: #232a35;
+  border-color: #2c3440;
+  color: #e6ebf2;
+}
+[data-theme='dark'] .field select:invalid,
+[data-theme='dark'] .field input[type='datetime-local']:invalid {
+  color: #7c8795;
 }

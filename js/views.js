@@ -68,8 +68,8 @@
       </div>
       <div class="filter-row filter-extra">
         <label class="filter-inline" for="filter-sort"><span>排序</span><select name="sort" id="filter-sort">${sortOptions.map(([value, label]) => `<option value="${value}" ${value === filters.sort ? 'selected' : ''}>${label}</option>`).join('')}</select></label>
-        <label class="filter-inline" for="filter-from"><span>起始日期</span><input type="date" name="dateFrom" id="filter-from" value="${e(filters.dateFrom)}"></label>
-        <label class="filter-inline" for="filter-to"><span>结束日期</span><input type="date" name="dateTo" id="filter-to" value="${e(filters.dateTo)}"></label>
+        <label class="filter-inline" for="filter-from"><span>起始日期</span><input type="date" lang="zh-CN" name="dateFrom" id="filter-from" value="${e(filters.dateFrom)}"></label>
+        <label class="filter-inline" for="filter-to"><span>结束日期</span><input type="date" lang="zh-CN" name="dateTo" id="filter-to" value="${e(filters.dateTo)}"></label>
       </div></form>`;
   }
   function empty(title, description, action) {
