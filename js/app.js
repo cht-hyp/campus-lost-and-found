@@ -486,6 +486,10 @@
       toast(error.message);
     }
   }
+  function openImage(src) {
+    document.getElementById('image-full').src = src;
+    document.getElementById('image-dialog').showModal();
+  }
 
   document.addEventListener('click', async (event) => {
     const skip = event.target.closest('.skip-link');
@@ -590,6 +594,16 @@
   document
     .getElementById('copy-close')
     .addEventListener('click', () => document.getElementById('copy-dialog').close());
+  document.addEventListener('dblclick', (event) => {
+    const image = event.target.closest('.detail-art .item-photo');
+    if (image) openImage(image.getAttribute('src'));
+  });
+  document.getElementById('image-close').addEventListener('click', () =>
+    document.getElementById('image-dialog').close()
+  );
+  document.getElementById('image-dialog').addEventListener('click', (event) => {
+    if (event.target.id === 'image-dialog') document.getElementById('image-dialog').close();
+  });
   window.addEventListener('storage', (event) => {
     if (event.key !== CampusStorage.STORAGE_KEY || !repository) return;
     try {

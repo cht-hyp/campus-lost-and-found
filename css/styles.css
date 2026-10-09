@@ -670,6 +670,7 @@ select {
 .detail-art .item-photo {
   object-fit: contain;
   border-radius: 7px;
+  cursor: zoom-in;
 }
 .detail-body {
   padding: 25px 28px 28px;
@@ -1089,6 +1090,29 @@ select {
   border-radius: 6px;
   margin-bottom: 22px;
 }
+.image-lightbox {
+  width: auto;
+  max-width: min(92vw, 1080px);
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: white;
+  color: inherit;
+}
+.image-lightbox img {
+  display: block;
+  max-width: min(88vw, 1040px);
+  max-height: 76vh;
+  margin: 0 auto 16px;
+  object-fit: contain;
+}
+.image-lightbox::backdrop {
+  background: #18243b66;
+}
+.image-lightbox .button {
+  display: flex;
+  margin: 0 auto;
+}
 .loading {
   padding: 70px 20px;
   text-align: center;
@@ -1502,6 +1526,9 @@ mark {
   color: #e0a0a0;
 }
 [data-theme='dark'] .modal {
+  background: #1e242e;
+}
+[data-theme='dark'] .image-lightbox {
   background: #1e242e;
 }
 [data-theme='dark'] .modal p {

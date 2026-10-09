@@ -124,7 +124,7 @@
     const own = post.ownerId === ownerId;
     const scene = post.type === 'lost' ? '遗失' : '拾取';
     return `${pageHeader(own ? '我的发布详情' : '信息详情', backButton())}<div class="detail-layout">
-      <article class="surface detail-card"><div class="detail-art">${U.itemVisual(post.category, post.image, post.title + '照片')}</div><div class="detail-body">
+      <article class="surface detail-card"><div class="detail-art">${U.itemVisual(post.category, post.image, post.title + '照片', '双击查看大图')}</div><div class="detail-body">
         <div class="detail-title-row"><h2>${e(post.title)}</h2>${badge(post)}</div>
         <div class="detail-badges">${typeBadge(post)}<span>${e(post.category)}</span>${post.ownerId === 'demo' ? '<span class="demo-badge">示例</span>' : ''}</div>
         <dl class="detail-data"><div><dt>${scene}地点</dt><dd>${e(post.location)}</dd></div><div><dt>${scene}时间</dt><dd>${U.formatDate(post.occurredAt, true)}</dd></div><div><dt>发布时间</dt><dd>${U.formatDate(post.createdAt, true)}</dd></div></dl>

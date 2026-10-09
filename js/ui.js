@@ -167,9 +167,9 @@
     const [background, shadow, picture] = itemPictures[selected];
     return `<svg class="item-art" data-category="${selected}" viewBox="0 0 160 160" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="160" height="160" rx="18" fill="${background}"/><ellipse cx="80" cy="132" rx="45" ry="6" fill="${shadow}"/>${picture}</svg>`;
   }
-  function itemVisual(category, photo, alt = '物品照片') {
+  function itemVisual(category, photo, alt = '物品照片', title = '') {
     return photo
-      ? `<img class="item-photo" src="${escapeHTML(photo)}" alt="${escapeHTML(alt)}">`
+      ? `<img class="item-photo" src="${escapeHTML(photo)}" alt="${escapeHTML(alt)}"${title ? ` title="${escapeHTML(title)}"` : ''}>`
       : itemArt(category);
   }
   function formatDate(value, full = false) {
