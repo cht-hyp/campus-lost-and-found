@@ -742,6 +742,38 @@ select {
   display: grid;
   gap: 12px;
 }
+.tips-card {
+  padding: 23px;
+}
+.tips-card h2 {
+  margin-bottom: 16px;
+  font-size: 17px;
+  font-weight: 600;
+}
+.tips-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.tips-list li {
+  position: relative;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.tips-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+}
 .editor-card {
   max-width: 850px;
   margin: 0 auto;

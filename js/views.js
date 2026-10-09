@@ -132,7 +132,7 @@
       </div></article>
       <aside class="aside-stack"><section class="surface contact-card"><h2>联系方式</h2><p class="contact-value">${e(post.contact)}</p><button type="button" class="button primary full-width" data-action="copy" data-id="${e(post.id)}">${icon('copy')}复制联系方式</button></section>
         ${own ? `<section class="surface owner-card"><div class="owner-actions"><a class="button secondary full-width" href="${link('edit', post.id)}">编辑信息</a><button type="button" class="button primary full-width" data-action="resolve" data-id="${e(post.id)}" ${post.status === 'resolved' ? 'disabled' : ''}>${post.status === 'resolved' ? '已完成' : '标记为' + (post.type === 'lost' ? '已找到' : '已归还')}</button><button type="button" class="button danger full-width" data-action="withdraw" data-id="${e(post.id)}">撤回发布</button></div></section>` : ''}
-      </aside></div>${own ? ownerClaims(post) : claimForm(post, ownerId)}${commentsSection(post, ownerId)}`;
+      ${tipsCard()}</aside></div>${own ? ownerClaims(post) : claimForm(post, ownerId)}${commentsSection(post, ownerId)}`;
   }
   function claimStatusLabel(status) {
     return status === 'accepted' ? '已确认' : status === 'rejected' ? '已拒绝' : '处理中';
@@ -182,6 +182,15 @@
       <form id="comment-form" class="comment-form" data-post-id="${e(post.id)}"><textarea id="comment-text" name="text" rows="2" maxlength="200" placeholder="补充线索或说明，例如物品细节、联系方式" aria-label="留言内容" required></textarea><span id="error-text" class="field-error" data-error-for="text"></span>
         <div class="comment-actions"><button type="submit" class="button primary small-button">发表留言</button></div></form>
       ${comments.length ? `<ul class="comment-list">${items}</ul>` : '<p class="comment-empty">还没有留言。</p>'}</section>`;
+  }
+  function tipsCard() {
+    return `<section class="surface tips-card"><h2>温馨提示</h2>
+      <ul class="tips-list">
+        <li>线下交接请选择公共场所，注意人身与财物安全。</li>
+        <li>请勿提前支付押金、保证金或任何费用。</li>
+        <li>确认物品特征与描述一致后再完成交接。</li>
+        <li>信息完成或不再需要时，请及时标记状态或撤回。</li>
+      </ul></section>`;
   }
   function editor(post, preferredType = 'lost') {
     const editing = Boolean(post);
