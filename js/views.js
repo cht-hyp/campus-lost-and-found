@@ -202,7 +202,7 @@
     function input(name, placeholder, extra = '') {
       return `<input id="post-${name}" name="${name}" value="${e(value[name] || '')}" placeholder="${placeholder}" aria-describedby="error-${name}" required ${extra}>`;
     }
-    return `${pageHeader(editing ? '编辑信息' : '发布信息', backButton('cancel-form'))}<section class="surface editor-card"><form id="post-form" novalidate data-id="${e(post ? post.id : '')}">
+    return `${pageHeader(editing ? '编辑信息' : '发布信息')}<section class="surface editor-card"><form id="post-form" novalidate data-id="${e(post ? post.id : '')}">
       <fieldset class="type-field"><legend>信息类型</legend><div class="type-options">${[
         ['lost', '寻物'],
         ['found', '招领']

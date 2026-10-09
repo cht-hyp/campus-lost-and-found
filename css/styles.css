@@ -1672,6 +1672,8 @@ mark {
 }
 [data-theme='dark'] .icon-button {
   color: #b6c0cf;
+  background: #1e242e;
+  border-color: #2c3440;
 }
 [data-theme='dark'] .icon-button:hover,
 [data-theme='dark'] .main-nav a:hover,
@@ -1798,4 +1800,27 @@ mark {
 [data-theme='dark'] .field select:invalid,
 [data-theme='dark'] .field input[type='datetime-local']:invalid {
   color: #7c8795;
+}
+[data-theme='dark'] .type-tabs {
+  background: #1a2028;
+}
+[data-theme='dark'] .type-options {
+  background: #1a2028;
+}
+[data-theme='dark'] .photo-control {
+  background: #1a2028;
+  border-color: #2c3440;
+}
+[data-theme='dark'] .empty-state {
+  background: #1e242e;
+  border-color: #2c3440;
+}
+[data-theme='dark'] .field input:focus,
+[data-theme='dark'] .field textarea:focus,
+[data-theme='dark'] .field select:focus {
+  background: #232a35;
+}
+[data-theme='dark'] .search-input-wrap:focus-within {
+  background: #1a2028;
+  border-color: #3b4a5e;
 }
