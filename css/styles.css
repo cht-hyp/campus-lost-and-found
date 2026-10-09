@@ -70,7 +70,7 @@ p {
 .page-shell {
   max-width: 1500px;
   margin: 0 auto;
-  padding: 0 40px 48px 236px;
+  padding: 100px 40px 48px;
 }
 .page-shell:focus {
   outline: none;
@@ -793,7 +793,7 @@ select {
   display: grid;
   gap: 18px;
   position: sticky;
-  top: 28px;
+  top: 96px;
 }
 .contact-card,
 .owner-card {
@@ -1096,16 +1096,15 @@ select {
 .main-nav {
   position: fixed;
   z-index: 5;
-  top: 28px;
-  left: max(24px, calc((100vw - 1500px) / 2 + 24px));
+  top: 0;
+  left: 0;
+  right: 0;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 180px;
-  padding: 12px;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 24px;
   background: white;
-  border: 1px solid var(--line);
-  border-radius: 16px;
+  border-bottom: 1px solid var(--line);
   box-shadow: var(--shadow);
 }
 .main-nav a {
@@ -1296,13 +1295,7 @@ mark {
 }
 @media (max-width: 1199px) {
   .page-shell {
-    padding-left: 214px;
     padding-right: 28px;
-  }
-  .main-nav {
-    width: 164px;
-    left: 22px;
-    padding: 10px;
   }
   .cards-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
