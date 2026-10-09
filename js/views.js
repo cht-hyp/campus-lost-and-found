@@ -32,7 +32,7 @@
           <div class="card-tags">${typeBadge(post)}<span>${e(post.category)}</span>${post.ownerId === 'demo' ? '<span class="demo-badge">示例</span>' : ''}</div>
         </div>
       </a>
-      ${mine ? `<div class="card-management"><a class="button secondary small-button" href="${link('edit', post.id)}">编辑信息</a><button type="button" class="button secondary small-button" data-action="resolve" data-id="${e(post.id)}" ${post.status === 'resolved' ? 'disabled' : ''}>${post.status === 'resolved' ? '已完成' : '标记为' + (post.type === 'lost' ? '已找到' : '已归还')}</button></div>` : ''}
+      ${mine ? `<div class="card-management"><a class="button secondary small-button" href="${link('edit', post.id)}">编辑信息</a><button type="button" class="button secondary small-button" data-action="resolve" data-id="${e(post.id)}" ${post.status === 'resolved' ? 'disabled' : ''}>${post.status === 'resolved' ? '已完成' : '标记为' + (post.type === 'lost' ? '已找到' : '已归还')}</button><button type="button" class="button danger small-button" data-action="withdraw" data-id="${e(post.id)}">撤回发布</button></div>` : ''}
     </article>`;
   }
   function cards(posts, mine = false, keyword = '') {
@@ -131,7 +131,7 @@
         <h3>物品描述</h3><p class="item-description">${e(post.description)}</p>
       </div></article>
       <aside class="aside-stack"><section class="surface contact-card"><h2>联系方式</h2><p class="contact-value">${e(post.contact)}</p><button type="button" class="button primary full-width" data-action="copy" data-id="${e(post.id)}">${icon('copy')}复制联系方式</button></section>
-        ${own ? `<section class="surface owner-card"><div class="owner-actions"><a class="button secondary full-width" href="${link('edit', post.id)}">编辑信息</a><button type="button" class="button primary full-width" data-action="resolve" data-id="${e(post.id)}" ${post.status === 'resolved' ? 'disabled' : ''}>${post.status === 'resolved' ? '已完成' : '标记为' + (post.type === 'lost' ? '已找到' : '已归还')}</button></div></section>` : ''}
+        ${own ? `<section class="surface owner-card"><div class="owner-actions"><a class="button secondary full-width" href="${link('edit', post.id)}">编辑信息</a><button type="button" class="button primary full-width" data-action="resolve" data-id="${e(post.id)}" ${post.status === 'resolved' ? 'disabled' : ''}>${post.status === 'resolved' ? '已完成' : '标记为' + (post.type === 'lost' ? '已找到' : '已归还')}</button><button type="button" class="button danger full-width" data-action="withdraw" data-id="${e(post.id)}">撤回发布</button></div></section>` : ''}
       </aside></div>${own ? ownerClaims(post) : claimForm(post, ownerId)}${commentsSection(post, ownerId)}`;
   }
   function claimStatusLabel(status) {

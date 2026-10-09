@@ -151,6 +151,14 @@ p {
   padding: 6px 16px;
   font-size: 13px;
 }
+.danger {
+  background: white;
+  color: #c0392b;
+  border-color: #f0c4c0;
+}
+.danger:hover:not(:disabled) {
+  background: #fdf3f2;
+}
 .filter-panel {
   padding: 22px 24px;
   background: white;
@@ -1343,6 +1351,14 @@ mark {
 }
 [data-theme='dark'] .secondary:hover:not(:disabled) {
   background: #2a3340;
+}
+[data-theme='dark'] .danger {
+  background: #2a1f20;
+  border-color: #5a3434;
+  color: #e08a8a;
+}
+[data-theme='dark'] .danger:hover:not(:disabled) {
+  background: #3a2626;
 }
 [data-theme='dark'] .field input,
 [data-theme='dark'] .field select,

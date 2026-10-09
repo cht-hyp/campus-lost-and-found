@@ -141,6 +141,13 @@
     return { ...post, status: 'resolved', updatedAt: now.toISOString() };
   }
 
+  function deletePost(posts, id, ownerId) {
+    const post = posts.find((item) => item.id === id);
+    if (!post) throw new DomainError('NOT_FOUND', '这条信息不存在');
+    if (post.ownerId !== ownerId) throw new DomainError('FORBIDDEN', '只能撤回自己发布的信息');
+    return posts.filter((item) => item.id !== id);
+  }
+
   function statusLabel(post) {
     if (post.type === 'lost') return post.status === 'resolved' ? '已找到' : '寻找中';
     return post.status === 'resolved' ? '已归还' : '待认领';
@@ -191,6 +198,7 @@
     createPost,
     editPost,
     resolvePost,
+    deletePost,
     statusLabel,
     filterPosts,
     makeId

@@ -267,3 +267,12 @@ test('日期范围按发生日期过滤', () => {
   assert.deepEqual(Core.filterPosts(items, { dateFrom: '2026-10-08' }).map((p) => p.id), ['c']);
   assert.deepEqual(Core.filterPosts(items, { dateTo: '2026-10-06' }).map((p) => p.id), ['a']);
 });
+test('本人可撤回发布，记录被移除', () => {
+  const next = Core.deletePost(records, 'old', 'me');
+  assert.equal(next.length, 2);
+  assert.deepEqual(next.map((p) => p.id), ['new', 'middle']);
+});
+test('他人不能撤回，不存在的记录报错', () => {
+  assert.throws(() => Core.deletePost(records, 'old', 'other'), (e) => e.code === 'FORBIDDEN');
+  assert.throws(() => Core.deletePost(records, 'nope', 'me'), (e) => e.code === 'NOT_FOUND');
+});

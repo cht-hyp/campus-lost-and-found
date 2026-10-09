@@ -339,6 +339,23 @@
       toast(error.message);
     }
   }
+  async function withdraw(id) {
+    const post = findPost(id);
+    if (!post || busy) return;
+    const approved = await confirmAction(
+      '撤回这条发布？',
+      '撤回后将删除这条信息，无法恢复。',
+      '确认撤回'
+    );
+    if (!approved) return;
+    try {
+      commit((posts, ownerId) => C.deletePost(posts, id, ownerId));
+      await navigate('#/mine', true);
+      toast('已撤回发布');
+    } catch (error) {
+      toast(error.message);
+    }
+  }
   async function copy(id) {
     const post = findPost(id);
     if (!post) return;
@@ -516,6 +533,7 @@
       await navigate(id ? `#/detail/${encodeURIComponent(id)}` : '#/home');
     } else if (action === 'back') await navigate(lastListHash);
     else if (action === 'resolve') await resolve(button.dataset.id);
+    else if (action === 'withdraw') await withdraw(button.dataset.id);
     else if (action === 'copy') await copy(button.dataset.id);
     else if (action === 'export-data') exportData();
     else if (action === 'choose-import') document.getElementById('import-file').click();
