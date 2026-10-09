@@ -98,9 +98,9 @@
       ><input id="manual-contact" class="manual-contact" readonly />
       <button type="button" class="button primary full-width" id="copy-close">关闭</button>
     </dialog>
-    <dialog id="image-dialog" class="image-lightbox" aria-label="查看大图">
-      <img id="image-full" src="" alt="物品照片大图" />
-      <button type="button" class="button secondary" id="image-close">关闭</button>
-    </dialog>
+    <div id="image-lightbox" class="image-lightbox" role="dialog" aria-modal="true" aria-label="图片查看" hidden>
+      <button type="button" class="lightbox-close" id="lightbox-close" aria-label="关闭">×</button>
+      <img id="image-full" src="" alt="物品照片大图" draggable="false" />
+    </div>
   </body>
 </html>

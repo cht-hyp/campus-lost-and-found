@@ -486,9 +486,33 @@
       toast(error.message);
     }
   }
+  const imageLightbox = document.getElementById('image-lightbox');
+  const imageFull = document.getElementById('image-full');
+  let imageScale = 1;
+  let imageTx = 0;
+  let imageTy = 0;
+  let imageDragging = false;
+  let imageStartX = 0;
+  let imageStartY = 0;
+  let imageOrigTx = 0;
+  let imageOrigTy = 0;
+
+  function applyImageTransform() {
+    imageFull.style.transform = `translate(${imageTx}px, ${imageTy}px) scale(${imageScale})`;
+  }
   function openImage(src) {
-    document.getElementById('image-full').src = src;
-    document.getElementById('image-dialog').showModal();
+    imageFull.src = src;
+    imageScale = 1;
+    imageTx = 0;
+    imageTy = 0;
+    applyImageTransform();
+    imageLightbox.hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  function closeImage() {
+    imageLightbox.hidden = true;
+    imageFull.src = '';
+    document.body.style.overflow = '';
   }
 
   document.addEventListener('click', async (event) => {
@@ -598,11 +622,45 @@
     const image = event.target.closest('.detail-art .item-photo');
     if (image) openImage(image.getAttribute('src'));
   });
-  document.getElementById('image-close').addEventListener('click', () =>
-    document.getElementById('image-dialog').close()
+  document.getElementById('lightbox-close').addEventListener('click', closeImage);
+  imageLightbox.addEventListener('click', (event) => {
+    if (event.target === imageLightbox) closeImage();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !imageLightbox.hidden) closeImage();
+  });
+  imageFull.addEventListener(
+    'wheel',
+    (event) => {
+      event.preventDefault();
+      const factor = event.deltaY < 0 ? 1.15 : 1 / 1.15;
+      imageScale = Math.min(8, Math.max(0.5, imageScale * factor));
+      applyImageTransform();
+    },
+    { passive: false }
   );
-  document.getElementById('image-dialog').addEventListener('click', (event) => {
-    if (event.target.id === 'image-dialog') document.getElementById('image-dialog').close();
+  imageFull.addEventListener('dblclick', () => {
+    imageScale = 1;
+    imageTx = 0;
+    imageTy = 0;
+    applyImageTransform();
+  });
+  imageFull.addEventListener('mousedown', (event) => {
+    imageDragging = true;
+    imageStartX = event.clientX;
+    imageStartY = event.clientY;
+    imageOrigTx = imageTx;
+    imageOrigTy = imageTy;
+    event.preventDefault();
+  });
+  window.addEventListener('mousemove', (event) => {
+    if (!imageDragging) return;
+    imageTx = imageOrigTx + (event.clientX - imageStartX);
+    imageTy = imageOrigTy + (event.clientY - imageStartY);
+    applyImageTransform();
+  });
+  window.addEventListener('mouseup', () => {
+    imageDragging = false;
   });
   window.addEventListener('storage', (event) => {
     if (event.key !== CampusStorage.STORAGE_KEY || !repository) return;
