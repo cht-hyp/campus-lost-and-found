@@ -3,6 +3,7 @@
   const C = window.CampusCore;
   const U = window.CampusUI;
   const V = window.CampusViews;
+  const Backup = window.CampusBackup;
   const app = document.getElementById('app');
   let repository;
   let state;
@@ -338,6 +339,49 @@
       input.select();
     }
   }
+  function exportData() {
+    try {
+      const json = Backup.serialize(repository.load());
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `campus-lost-and-found-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      toast('备份已导出');
+    } catch (error) {
+      toast(error.message);
+    }
+  }
+  async function importData(file) {
+    if (!file) return;
+    let incoming;
+    try {
+      incoming = Backup.parse(await file.text());
+    } catch (error) {
+      toast(error.message);
+      return;
+    }
+    const approved = await confirmAction(
+      '导入这份备份？',
+      `将合并 ${incoming.posts.length} 条记录并恢复备份中的身份，本机原有记录按编号保留。`,
+      '确认导入'
+    );
+    if (!approved) return;
+    try {
+      const latest = repository.load();
+      const next = Backup.merge(latest, incoming);
+      repository.save(next);
+      state = next;
+      render();
+      toast('备份已导入');
+    } catch (error) {
+      toast(error.message);
+    }
+  }
 
   document.addEventListener('click', async (event) => {
     const skip = event.target.closest('.skip-link');
@@ -386,6 +430,8 @@
     } else if (action === 'back') await navigate(lastListHash);
     else if (action === 'resolve') await resolve(button.dataset.id);
     else if (action === 'copy') await copy(button.dataset.id);
+    else if (action === 'export-data') exportData();
+    else if (action === 'choose-import') document.getElementById('import-file').click();
     else if (action === 'retry') boot();
   });
   document.addEventListener('submit', async (event) => {
@@ -419,6 +465,12 @@
       document.querySelector('[data-scene-label="occurredAt"]').textContent = scene + '时间';
     }
     updateDirty();
+  });
+  document.addEventListener('change', (event) => {
+    if (event.target.id === 'import-file') {
+      importData(event.target.files[0]);
+      event.target.value = '';
+    }
   });
   document
     .getElementById('copy-close')

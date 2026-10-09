@@ -381,6 +381,25 @@ select {
   gap: 15px;
   margin-bottom: 20px;
 }
+.data-card {
+  margin-top: 24px;
+  padding: 22px 24px;
+}
+.data-card h2 {
+  margin-bottom: 10px;
+  font-size: 17px;
+  font-weight: 600;
+}
+.data-card p {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 18px;
+}
+.data-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
 .surface {
   background: white;
   border: 1px solid var(--line);

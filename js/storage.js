@@ -79,5 +79,5 @@
     return { load, save };
   }
 
-  return { STORAGE_KEY, createRepository };
+  return { STORAGE_KEY, validState, createRepository };
 });

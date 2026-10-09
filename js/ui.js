@@ -78,6 +78,8 @@
     chevron: '<path d="m9 5 7 7-7 7"/>',
     refresh:
       '<path d="M20 7v5h-5M4 17v-5h5"/><path d="M6 7a7 7 0 0 1 12-2l2 3M4 16l2 3a7 7 0 0 0 12-2"/>',
+    download: '<path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14"/>',
+    upload: '<path d="M12 15V4m0 0-4 4m4-4 4 4M5 19h14"/>',
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/>'
   };
   function icon(name, className = '') {
