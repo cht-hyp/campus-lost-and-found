@@ -108,6 +108,8 @@
     download: '<path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14"/>',
     upload: '<path d="M12 15V4m0 0-4 4m4-4 4 4M5 19h14"/>',
     chart: '<path d="M5 20v-8M12 20V6M19 20v-9"/><path d="M3 20h18"/>',
+    moon: '<path d="M20 13.5A8 8 0 1 1 10.5 4a6 6 0 0 0 9.5 9.5Z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/>'
   };
   function icon(name, className = '') {

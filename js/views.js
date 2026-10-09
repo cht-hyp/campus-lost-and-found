@@ -8,7 +8,10 @@
   const link = (route, id) => `#/${route}/${encodeURIComponent(id)}`;
 
   function pageHeader(title, back = '') {
-    return `<header class="page-heading"><div>${back}</div><h1>${title}</h1><div></div></header>`;
+    return `<header class="page-heading"><div>${back}</div><h1>${title}</h1><div>${themeToggle()}</div></header>`;
+  }
+  function themeToggle() {
+    return `<button type="button" class="icon-button theme-toggle" data-action="toggle-theme" aria-label="切换深色模式">${icon('moon')}</button>`;
   }
   function backButton(action = 'back') {
     return `<button type="button" class="icon-button" data-action="${action}" aria-label="返回">${icon('back')}</button>`;

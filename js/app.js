@@ -33,6 +33,21 @@
       element.hidden = true;
     }, 4200);
   }
+  const THEME_KEY = 'campus-lost-found:theme';
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    const button = document.querySelector('.theme-toggle');
+    if (!button) return;
+    button.setAttribute('aria-label', theme === 'dark' ? '切换浅色模式' : '切换深色模式');
+    button.innerHTML = U.icon(theme === 'dark' ? 'sun' : 'moon');
+  }
+  function toggleTheme() {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try {
+      localStorage.setItem(THEME_KEY, next);
+    } catch (_) {}
+  }
   function confirmAction(title, message, okLabel, cancelLabel = '取消') {
     const dialog = document.getElementById('confirm-dialog');
     if (dialog.open) return Promise.resolve(false);
@@ -178,6 +193,7 @@
       if (active) anchor.setAttribute('aria-current', 'page');
       else anchor.removeAttribute('aria-current');
     });
+    applyTheme(document.documentElement.dataset.theme);
     const form = document.getElementById('post-form');
     initialForm = form ? JSON.stringify(readPostForm(form)) : '';
     dirty = false;
@@ -453,6 +469,7 @@
     else if (action === 'copy') await copy(button.dataset.id);
     else if (action === 'export-data') exportData();
     else if (action === 'choose-import') document.getElementById('import-file').click();
+    else if (action === 'toggle-theme') toggleTheme();
     else if (action === 'retry') boot();
   });
   document.addEventListener('submit', async (event) => {
@@ -511,6 +528,11 @@
   });
 
   function boot() {
+    let savedTheme = 'light';
+    try {
+      savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+    } catch (_) {}
+    document.documentElement.dataset.theme = savedTheme;
     try {
       repository = CampusStorage.createRepository(window.localStorage, { seedPosts: CampusSeed });
       state = repository.load();
