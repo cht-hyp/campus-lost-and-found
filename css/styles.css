@@ -1824,3 +1824,9 @@ mark {
   background: #1a2028;
   border-color: #3b4a5e;
 }
+[data-theme='dark'] .card-art {
+  background: #1a2028 !important;
+}
+[data-theme='dark'] .item-art {
+  filter: brightness(0.7) saturate(0.85);
+}
